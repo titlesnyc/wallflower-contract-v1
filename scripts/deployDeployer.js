@@ -1,7 +1,7 @@
 (async () => {
     try {
-      const TestDeployer = await hre.ethers.getContractFactory("TestDeployer");
-      const deployerInstance = await TestDeployer.deploy();
+      const TitlesDeployer = await hre.ethers.getContractFactory("TitlesDeployer");
+      const deployerInstance = await TitlesDeployer.deploy();
   
       await deployerInstance.deployed();
   
