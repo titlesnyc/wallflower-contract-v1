@@ -16,6 +16,15 @@ module.exports = {
         count: 20,
       },
     },
+    goerli: {
+      url: process.env.ALCHEMY_GOERLI_URL,
+      accounts: {
+        mnemonic,
+        path: "m/44'/60'/0'/0",
+        initialIndex: 0,
+        count: 20,
+      },
+    },
   },
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY,
