@@ -7,6 +7,12 @@ let mnemonic = process.env.SECRET
 module.exports = {
   solidity: "0.8.18",
   networks: {
+    hardhat: {
+      forking: {
+        url: process.env.ALCHEMY_MAINNET_URL,
+        blockNumber: 17237588
+      }
+    },
     sepolia: {
       url: process.env.ALCHEMY_SEPOLIA_URL,
       accounts: {

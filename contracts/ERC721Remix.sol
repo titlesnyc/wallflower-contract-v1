@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-            /*                                                                                                      
+/*                                                                                                      
                                 @@@@@@@  @@@@@  .                                                                       
                             @@@@@@@@@* @@@@@  /@@@@@@@@@%                                                               
                           @ @@@      #@@@@&      @@@@@@@@@@@@@@                                                         
@@ -31,7 +31,7 @@ pragma solidity ^0.8.4;
                                                                     &@@@@%       (@@@(                                  
                                                                    @@@@@        @@@@                                    
                                                                                @@@@                                                           
-*/                                                          
+*/                                                         
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -42,10 +42,15 @@ contract ERC721Remix is ERC721, Ownable {
     using Counters for Counters.Counter;
 
     Counters.Counter private _tokenIdCounter;
-    string private remixUri;
 
-    constructor(string memory _name, string memory _symbol, string memory _uri) ERC721(_name, _symbol) {
+    // string private remixUri;
+    // address private splitAddress;
+    string public remixUri;
+    address public splitAddress;
+
+    constructor(string memory _name, string memory _symbol, string memory _uri, address _split) ERC721(_name, _symbol) {
         remixUri = _uri;
+        splitAddress = _split;
     }
 
     function _baseURI() internal view override returns (string memory) {
