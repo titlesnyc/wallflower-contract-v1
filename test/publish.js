@@ -9,36 +9,46 @@ describe("TitlesDeployer", function () {
         const splitMainGoerli = '0x2ed6c4B5dA6378c7897AC67Ba9e43102Feb694EE';
         const splitMainEthereum = '0x2ed6c4B5dA6378c7897AC67Ba9e43102Feb694EE';
 
-        console.log("1️⃣")
+        console.log("1️⃣ - Test started")
 
         const TitlesDeployer = await hre.ethers.getContractFactory("TitlesDeployer");
         const deployer = await TitlesDeployer.deploy(splitMainEthereum);
 
+        console.log("2️⃣ - Deployed deployer w/ Split Main")
+
         const name = 'Test Name'
         const symbol = 'TS'
-        const uri = 'ipfs://testURI'
+        const inputUri = 'ipfs://testURI'
 
         const rainbowDev = '0xd9111EbeC09Ae2cb4778e6278d5959929bAA59Cc'
         const metamaskDev = '0xEA7c0d05AE85a02ADd86c0FC7b348c997C0B1fF4'
         const accounts = [rainbowDev, metamaskDev]
         const allocations = [700000, 300000]
 
-        console.log("2️⃣")
-
-        await deployer.publishRemix(name, symbol, uri, accounts, allocations)
+        await deployer.publishRemix(name, symbol, inputUri, accounts, allocations)
         const publishedAddress = await deployer.remixContractArray(0)
-        console.log(publishedAddress)
+
+        console.log("3️⃣ - Published remix")
+        console.log("Remix address:  " + publishedAddress)
 
         const remix = await ethers.getContractAt('ERC721Remix', publishedAddress)
         await remix.buyToken()
         const remixUri = await remix.tokenURI(0)
-        console.log(remixUri)
+        expect(remixUri).to.equal(inputUri);
 
         const masterUri = await remix.remixUri()
-        console.log(masterUri)
+        expect(masterUri).to.equal(inputUri);
 
         const splitAddress = await remix.splitAddress()
-        console.log(splitAddress)
+        console.log("Split address:  " + splitAddress)
+
+
+        /* TODO: Further test
+            - Buy an NFT
+            - Distribute the funds
+            - Make sure split wallets and allocations are right
+        */
+
 
 
         // =================== Test Split - this doens't work for local dev bc SDK only works on real nets
@@ -63,13 +73,5 @@ describe("TitlesDeployer", function () {
         // const returnValue = result.toString();
         // console.log(returnValue);
 
-
-
-        console.log("3️⃣")
-
-        const x = 1;
-        expect(x).to.equal(x);
-
-        const [owner, otherAccount] = await ethers.getSigners();
     });
 });
