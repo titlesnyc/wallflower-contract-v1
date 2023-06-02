@@ -87,13 +87,12 @@ contract ERC721Remix is ERC721A, Ownable {
         mintLimitPerWallet = _mintLimitPerWallet;
         saleEndTime = _saleEndTime;
 
-        transferOwnership(_creator); // should this be to an explicitly passed creator, or to msg.sender? does that work in constructor - is that the deployer/proxy/etc or nah?
+        transferOwnership(_creator);
     }
 
     function _baseURI() internal view override returns (string memory) {
         return remixUri;
     }
-
 
     function purchase(uint256 quantity) public payable {
         // Check sale active
@@ -118,14 +117,6 @@ contract ERC721Remix is ERC721A, Ownable {
         _mintNFTs(_msgSender(), quantity);
     }
 
-    // function buyToken() public payable {
-    //     uint256 tokenId = _tokenIdCounter.current();
-    //     require(msg.value == tokenId * 0.1 ether, "Not enough funds sent");
-
-    //     _tokenIdCounter.increment();
-    //     _safeMint(msg.sender, tokenId);
-    // }
-
     /// Batch in size of 8 for ERC721A
     function _mintNFTs(address to, uint256 quantity) internal {
         do {
@@ -142,12 +133,6 @@ contract ERC721Remix is ERC721A, Ownable {
         if (saleEndTime == 0) { return true; }
         return saleEndTime > block.timestamp;
     }
-
-    // The following functions are overrides required by Solidity.
-
-    // function _burn(uint256 tokenId) internal override(ERC721A) {
-    //     super._burn(tokenId);
-    // }
 
     function tokenURI(uint256 tokenId)
         public

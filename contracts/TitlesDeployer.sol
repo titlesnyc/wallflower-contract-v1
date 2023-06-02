@@ -40,14 +40,16 @@ import {ISplitMain} from "splits-utils/src/interfaces/ISplitMain.sol";
 contract TitlesDeployer {
     address[] public remixContractArray;
     ISplitMain public immutable splitMain;
+    address public controller;
 
     event PublishedRemix(
         address indexed creator,
         address indexed remixContractAddress
     );
 
-    constructor(address _splitMainAddress) {
+    constructor(address _splitMainAddress, address _controller) {
         splitMain = ISplitMain(_splitMainAddress);
+        controller = _controller;
     }
 
     function publishRemix(
@@ -67,7 +69,7 @@ contract TitlesDeployer {
             accounts: accounts,
             percentAllocations: allocations,
             distributorFee: 0,
-            controller: 0xd9111EbeC09Ae2cb4778e6278d5959929bAA59Cc // TODO: don't hardcode
+            controller: controller
         });
 
         ERC721Remix remixContract = new ERC721Remix(_creator, _name, _symbol, _uri, splitAddress, _price, _maxSupply, _mintLimitPerWallet, _saleEndTime);

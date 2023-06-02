@@ -9,11 +9,13 @@ describe("TitlesDeployer", function () {
         const splitMainGoerli = '0x2ed6c4B5dA6378c7897AC67Ba9e43102Feb694EE';
         const splitMainEthereum = '0x2ed6c4B5dA6378c7897AC67Ba9e43102Feb694EE';
 
+        const titlesController = '0xd9111EbeC09Ae2cb4778e6278d5959929bAA59Cc'
+
         console.log("1️⃣ - Test started")
 
         // Deploy Deployer
         const TitlesDeployer = await hre.ethers.getContractFactory("TitlesDeployer");
-        const deployer = await TitlesDeployer.deploy(splitMainEthereum);
+        const deployer = await TitlesDeployer.deploy(splitMainEthereum, titlesController);
 
         console.log("Deployer address: " + deployer)
 
