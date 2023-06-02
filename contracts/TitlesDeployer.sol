@@ -50,16 +50,27 @@ contract TitlesDeployer {
         splitMain = ISplitMain(_splitMainAddress);
     }
 
-    function publishRemix(string memory _name, string memory _symbol, string memory _uri, address[] memory accounts, uint32[] memory allocations) public {
+    function publishRemix(
+        address _creator,
+        string memory _name,
+        string memory _symbol, 
+        string memory _uri, 
+        address[] memory accounts, 
+        uint32[] memory allocations,
+        uint256 _price,
+        uint256 _maxSupply,
+        uint256 _mintLimitPerWallet,
+        uint256 _saleEndTime
+    ) public {
 
         address splitAddress = splitMain.createSplit({
             accounts: accounts,
             percentAllocations: allocations,
             distributorFee: 0,
-            controller: 0xd9111EbeC09Ae2cb4778e6278d5959929bAA59Cc
+            controller: 0xd9111EbeC09Ae2cb4778e6278d5959929bAA59Cc // TODO: don't hardcode
         });
 
-        ERC721Remix remixContract = new ERC721Remix(_name, _symbol, _uri, splitAddress);
+        ERC721Remix remixContract = new ERC721Remix(_creator, _name, _symbol, _uri, splitAddress, _price, _maxSupply, _mintLimitPerWallet, _saleEndTime);
         address remixContractAddress = address(remixContract);
         remixContractArray.push(remixContractAddress);
 

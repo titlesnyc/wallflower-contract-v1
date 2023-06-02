@@ -33,57 +33,128 @@ pragma solidity ^0.8.4;
                                                                                @@@@                                                           
 */                                                         
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+// import {ERC721AUpgradeable} from "erc721a-upgradeable/contracts/ERC721AUpgradeable.sol";
+import "erc721a/contracts/ERC721A.sol";
+// import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
-contract ERC721Remix is ERC721, Ownable {
-    using Counters for Counters.Counter;
+import "hardhat/console.sol";
 
+contract ERC721Remix is ERC721A, Ownable {
+
+    /// @dev This is the max mint batch size for the optimized ERC721A mint contract
+    uint256 internal immutable MAX_MINT_BATCH_SIZE = 8;
+
+    using Counters for Counters.Counter;
     Counters.Counter private _tokenIdCounter;
 
-    // string private remixUri;
-    // address private splitAddress;
+    // Metadata
     string public remixUri;
+    // _name, _symbol inherited
+    // description is stored in URI
+
+    // Sales Configuration
+    uint256 public price;
+    uint256 public maxSupply;
+    uint256 public mintLimitPerWallet;
+    uint256 public saleEndTime;
+
+    // Derivative Configuration
+    uint256 public royaltyBps;
+    uint256 public mintFee;
     address public splitAddress;
 
-    constructor(string memory _name, string memory _symbol, string memory _uri, address _split) ERC721(_name, _symbol) {
+    // Ownership
+    // _owner is inherited
+
+    constructor(
+        address _creator,
+        string memory _name, 
+        string memory _symbol, 
+        string memory _uri, 
+        address _split,
+        uint256 _price,
+        uint256 _maxSupply,
+        uint256 _mintLimitPerWallet,
+        uint256 _saleEndTime
+    ) ERC721A(_name, _symbol) {
         remixUri = _uri;
         splitAddress = _split;
+        price = _price;
+        maxSupply = _maxSupply;
+        mintLimitPerWallet = _mintLimitPerWallet;
+        saleEndTime = _saleEndTime;
+
+        transferOwnership(_creator); // should this be to an explicitly passed creator, or to msg.sender? does that work in constructor - is that the deployer/proxy/etc or nah?
     }
 
     function _baseURI() internal view override returns (string memory) {
         return remixUri;
     }
 
-    function safeMint(address to) public onlyOwner {
-        uint256 tokenId = _tokenIdCounter.current();
-        _tokenIdCounter.increment();
-        _safeMint(to, tokenId);
+
+    function purchase(uint256 quantity) public payable {
+        // Check sale active
+        require(_saleActive(), "Sale has ended");
+
+        // Check supply
+        if (quantity + _totalMinted() > maxSupply) {
+            revert("This drop is sold out");
+        }
+
+        // Check price
+        uint256 expectedPrice = (price + mintFee) * quantity;
+        require(msg.value == expectedPrice, "Incorrect purchase price");
+
+        // Check limit
+        if (mintLimitPerWallet != 0 && 
+            _numberMinted(_msgSender()) + quantity > mintLimitPerWallet) {
+            revert("Cannot purchase that many");
+        }
+
+        // Mint!
+        _mintNFTs(_msgSender(), quantity);
     }
 
-    function buyToken() public payable {
-        uint256 tokenId = _tokenIdCounter.current();
-        require(msg.value == tokenId * 0.1 ether, "Not enough funds sent");
+    // function buyToken() public payable {
+    //     uint256 tokenId = _tokenIdCounter.current();
+    //     require(msg.value == tokenId * 0.1 ether, "Not enough funds sent");
 
-        _tokenIdCounter.increment();
-        _safeMint(msg.sender, tokenId);
+    //     _tokenIdCounter.increment();
+    //     _safeMint(msg.sender, tokenId);
+    // }
+
+    /// Batch in size of 8 for ERC721A
+    function _mintNFTs(address to, uint256 quantity) internal {
+        do {
+            uint256 toMint = quantity > MAX_MINT_BATCH_SIZE
+                ? MAX_MINT_BATCH_SIZE
+                : quantity;
+            _mint({to: to, quantity: toMint});
+            quantity -= toMint;
+        } while (quantity > 0);
+    }
+
+    function _saleActive() internal view returns (bool) {
+        console.log("active?");
+        if (saleEndTime == 0) { return true; }
+        return saleEndTime > block.timestamp;
     }
 
     // The following functions are overrides required by Solidity.
 
-    function _burn(uint256 tokenId) internal override(ERC721) {
-        super._burn(tokenId);
-    }
+    // function _burn(uint256 tokenId) internal override(ERC721A) {
+    //     super._burn(tokenId);
+    // }
 
     function tokenURI(uint256 tokenId)
         public
         view
-        override(ERC721)
+        override(ERC721A)
         returns (string memory)
     {
-        // return string(abi.encodePacked(_baseURI(),"spacebear_",Strings.toString(tokenId+1),".json"));
         require(_exists(tokenId), "invalid token ID");
         return _baseURI();
     }
