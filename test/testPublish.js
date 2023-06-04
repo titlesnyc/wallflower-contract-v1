@@ -143,13 +143,13 @@ describe("TitlesDeployer", function () {
         const name = 'Meta'
         const symbol = 'META'
         const inputUri = 'https://ipfs.thirdwebcdn.com/ipfs/QmeDPAdEdmrjc9d3NeMt3DzusUDG5BjvrLQSpKgXYcG867/0'
-        const accounts =['0x40211097528189E4Aa814bC2d6c76a7117e5a32C', '0x6a4AA35badeb1417811Edb4D005384678f4dA79e', '0xf2254525e9f2147990279ba450fb23432040dfdd', '0xf4dFB4eC3945770e41AE8BF0f6AfDF186dC8a45D']
-        const allocations = [600000, 100000, 200000, 100000]
+        const accounts =['0x40211097528189E4Aa814bC2d6c76a7117e5a32C', '0xF2254525E9f2147990279BA450fb23432040dfdd', '0xFFe7FAc6E73627D2f00A771a749E38fa781E5d67', ]
+        const allocations = [600000, 200000, 200000]
         const priceEth = 0.1
         const priceWei = ethers.utils.parseUnits(priceEth.toString(), "ether")
-        const supply = 10
-        const mintLimit = 2
-        const endTime = 1686279624
+        const supply = 25
+        const mintLimit = 3
+        const endTime = 1686286044
 
         // check allocations
         console.log(accounts)
