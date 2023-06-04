@@ -44,7 +44,8 @@ contract TitlesDeployer {
 
     event PublishedRemix(
         address indexed creator,
-        address indexed remixContractAddress
+        address indexed remixContractAddress,
+        address indexed splitAddress
     );
 
     constructor(address _splitMainAddress, address _controller) {
@@ -78,7 +79,8 @@ contract TitlesDeployer {
 
         emit PublishedRemix({
             creator: msg.sender,
-            remixContractAddress: remixContractAddress
+            remixContractAddress: remixContractAddress,
+            splitAddress: splitAddress
         });
     }
 }
