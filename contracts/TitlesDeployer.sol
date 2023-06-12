@@ -40,7 +40,7 @@ import {ISplitMain} from "splits-utils/src/interfaces/ISplitMain.sol";
 contract TitlesDeployer {
     address[] public remixContractArray;
     ISplitMain public immutable splitMain;
-    address public controller;
+    address public controller; // TODO: don't set controller for splits
 
     event PublishedRemix(
         address indexed creator,
