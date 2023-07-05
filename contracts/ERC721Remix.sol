@@ -34,21 +34,29 @@ pragma solidity ^0.8.4;
 */                                                         
 
 // import {ERC721AUpgradeable} from "erc721a-upgradeable/contracts/ERC721AUpgradeable.sol";
+// import {IERC721AUpgradeable} from "erc721a-upgradeable/contracts/IERC721AUpgradeable.sol";
+import 'erc721a-upgradeable/contracts/ERC721AUpgradeable.sol';
 import "erc721a/contracts/ERC721A.sol";
 // import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
+import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
+
+import "@openzeppelin/contracts/proxy/Clones.sol";
+
 import "hardhat/console.sol";
 
-contract ERC721Remix is ERC721A, Ownable {
+contract ERC721Remix is ERC721AUpgradeable, OwnableUpgradeable {
 
     /// @dev This is the max mint batch size for the optimized ERC721A mint contract
     uint256 internal immutable MAX_MINT_BATCH_SIZE = 8;
 
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIdCounter;
+
+    bool private _initialized = false;
 
     // Metadata
     string public remixUri;
@@ -69,8 +77,28 @@ contract ERC721Remix is ERC721A, Ownable {
     // Ownership
     // _owner is inherited
 
-    constructor(
-        address _creator,
+    // constructor(
+    //     address _creator,
+    //     string memory _name, 
+    //     string memory _symbol, 
+    //     string memory _uri, 
+    //     address _split,
+    //     uint256 _price,
+    //     uint256 _maxSupply,
+    //     uint256 _mintLimitPerWallet,
+    //     uint256 _saleEndTime
+    // ) ERC721A(_name, _symbol) {
+    //     remixUri = _uri;
+    //     splitAddress = _split;
+    //     price = _price;
+    //     maxSupply = _maxSupply;
+    //     mintLimitPerWallet = _mintLimitPerWallet;
+    //     saleEndTime = _saleEndTime;
+
+    //     transferOwnership(_creator);
+    // }
+
+    function initialize(address _creator,
         string memory _name, 
         string memory _symbol, 
         string memory _uri, 
@@ -79,7 +107,20 @@ contract ERC721Remix is ERC721A, Ownable {
         uint256 _maxSupply,
         uint256 _mintLimitPerWallet,
         uint256 _saleEndTime
-    ) ERC721A(_name, _symbol) {
+    ) public initializerERC721A initializer {
+        require(!_initialized, "Contract instance has already been initialized");
+
+        console.log("owner:");
+        
+        //console.log(_owner.address);
+        console.log("sender (init):");
+        console.log(msg.sender);
+
+        __ERC721A_init(_name, _symbol);
+        __Ownable_init();
+
+
+        //ERC721A.initialize(_name, _symbol);
         remixUri = _uri;
         splitAddress = _split;
         price = _price;
@@ -88,6 +129,8 @@ contract ERC721Remix is ERC721A, Ownable {
         saleEndTime = _saleEndTime;
 
         transferOwnership(_creator);
+
+        _initialized = true;
     }
 
     function _baseURI() internal view override returns (string memory) {
@@ -95,6 +138,10 @@ contract ERC721Remix is ERC721A, Ownable {
     }
 
     function purchase(uint256 quantity) public payable {
+
+        console.log("sender (purchase):");
+        console.log(msg.sender);
+
         // Check sale active
         require(_saleActive(), "Sale has ended");
 
@@ -137,7 +184,7 @@ contract ERC721Remix is ERC721A, Ownable {
     function tokenURI(uint256 tokenId)
         public
         view
-        override(ERC721A)
+        override(ERC721AUpgradeable)
         returns (string memory)
     {
         require(_exists(tokenId), "invalid token ID");

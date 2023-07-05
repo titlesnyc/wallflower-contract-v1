@@ -6,18 +6,23 @@ const hre = require("hardhat");
 describe("TitlesDeployer", function () {
     it("able to publish a Titles Remix", async function () {
 
-        const splitMainGoerli = '0x2ed6c4B5dA6378c7897AC67Ba9e43102Feb694EE';
         const splitMainEthereum = '0x2ed6c4B5dA6378c7897AC67Ba9e43102Feb694EE';
-
         const titlesController = '0xd9111EbeC09Ae2cb4778e6278d5959929bAA59Cc'
 
         console.log("1️⃣ - Test started")
 
+        // Deploy Implementation
+        const RemixImplementation = await hre.ethers.getContractFactory("ERC721Remix");
+        const implementation = await RemixImplementation.deploy();
+
+        console.log("🛠 Implementation deployed: ")
+        console.log(implementation.address)
+
         // Deploy Deployer
         const TitlesDeployer = await hre.ethers.getContractFactory("TitlesDeployer");
-        const deployer = await TitlesDeployer.deploy(splitMainEthereum, titlesController);
+        const deployer = await TitlesDeployer.deploy(splitMainEthereum, titlesController, implementation.address);
 
-        console.log("Deployer address: " + deployer)
+        console.log("Deployer address: " + deployer.address)
 
         console.log("2️⃣ - Deployed deployer w/ Split Main")
 
@@ -130,9 +135,16 @@ describe("TitlesDeployer", function () {
 
         console.log("1️⃣ - Test started")
 
+        // Deploy Implementation
+        const RemixImplementation = await hre.ethers.getContractFactory("ERC721Remix");
+        const implementation = await RemixImplementation.deploy();
+
+        console.log("🛠 Implementation deployed: ")
+        console.log(implementation.address)
+
         // Deploy Deployer
         const TitlesDeployer = await hre.ethers.getContractFactory("TitlesDeployer");
-        const deployer = await TitlesDeployer.deploy(splitMainEthereum, titlesController);
+        const deployer = await TitlesDeployer.deploy(splitMainEthereum, titlesController, implementation.address);
 
         console.log("Deployer address: " + deployer)
 

@@ -36,11 +36,16 @@ pragma solidity ^0.8.17;
 import "./ERC721Remix.sol";
 
 import {ISplitMain} from "splits-utils/src/interfaces/ISplitMain.sol";
+import "@openzeppelin/contracts/proxy/Clones.sol";
+
+import "hardhat/console.sol";
 
 contract TitlesDeployer {
     address[] public remixContractArray;
     ISplitMain public immutable splitMain;
     address public controller; // TODO: don't set controller for splits
+
+    address immutable remixImplementation;
 
     event PublishedRemix(
         address indexed creator,
@@ -48,9 +53,10 @@ contract TitlesDeployer {
         address indexed splitAddress
     );
 
-    constructor(address _splitMainAddress, address _controller) {
+    constructor(address _splitMainAddress, address _controller, address _implementation) {
         splitMain = ISplitMain(_splitMainAddress);
         controller = _controller;
+        remixImplementation = _implementation;
     }
 
     function publishRemix(
@@ -73,13 +79,17 @@ contract TitlesDeployer {
             controller: controller
         });
 
-        ERC721Remix remixContract = new ERC721Remix(_creator, _name, _symbol, _uri, splitAddress, _price, _maxSupply, _mintLimitPerWallet, _saleEndTime);
-        address remixContractAddress = address(remixContract);
-        remixContractArray.push(remixContractAddress);
+        address remixClone = Clones.clone(remixImplementation);
+        ERC721Remix(remixClone).initialize(_creator, _name, _symbol, _uri, splitAddress, _price, _maxSupply, _mintLimitPerWallet, _saleEndTime);
+        remixContractArray.push(remixClone);
+
+        // ERC721Remix remixContract = new ERC721Remix(_creator, _name, _symbol, _uri, splitAddress, _price, _maxSupply, _mintLimitPerWallet, _saleEndTime);
+        // address remixContractAddress = address(remixContract);
+        //remixContractArray.push(remixContractAddress);
 
         emit PublishedRemix({
             creator: msg.sender,
-            remixContractAddress: remixContractAddress,
+            remixContractAddress: remixClone,
             splitAddress: splitAddress
         });
     }
