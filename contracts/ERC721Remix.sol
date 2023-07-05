@@ -72,37 +72,15 @@ contract ERC721Remix is ERC721AUpgradeable, OwnableUpgradeable {
     // Derivative Configuration
     uint256 public royaltyBps;
     uint256 public mintFee;
-    address public splitAddress;
-
-    // Ownership
-    // _owner is inherited
-
-    // constructor(
-    //     address _creator,
-    //     string memory _name, 
-    //     string memory _symbol, 
-    //     string memory _uri, 
-    //     address _split,
-    //     uint256 _price,
-    //     uint256 _maxSupply,
-    //     uint256 _mintLimitPerWallet,
-    //     uint256 _saleEndTime
-    // ) ERC721A(_name, _symbol) {
-    //     remixUri = _uri;
-    //     splitAddress = _split;
-    //     price = _price;
-    //     maxSupply = _maxSupply;
-    //     mintLimitPerWallet = _mintLimitPerWallet;
-    //     saleEndTime = _saleEndTime;
-
-    //     transferOwnership(_creator);
-    // }
+    address public creatorProceedRecipient;
+    address public derivativeFeeRecipient;
 
     function initialize(address _creator,
         string memory _name, 
         string memory _symbol, 
         string memory _uri, 
-        address _split,
+        address _creatorProceedRecipient,
+        address _derivativeFeeRecipient,
         uint256 _price,
         uint256 _maxSupply,
         uint256 _mintLimitPerWallet,
@@ -110,19 +88,15 @@ contract ERC721Remix is ERC721AUpgradeable, OwnableUpgradeable {
     ) public initializerERC721A initializer {
         require(!_initialized, "Contract instance has already been initialized");
 
-        console.log("owner:");
-        
-        //console.log(_owner.address);
         console.log("sender (init):");
         console.log(msg.sender);
 
         __ERC721A_init(_name, _symbol);
         __Ownable_init();
 
-
-        //ERC721A.initialize(_name, _symbol);
         remixUri = _uri;
-        splitAddress = _split;
+        creatorProceedRecipient = _creatorProceedRecipient;
+        derivativeFeeRecipient = _derivativeFeeRecipient;
         price = _price;
         maxSupply = _maxSupply;
         mintLimitPerWallet = _mintLimitPerWallet;

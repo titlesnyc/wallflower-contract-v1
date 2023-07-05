@@ -49,8 +49,9 @@ contract TitlesDeployer {
 
     event PublishedRemix(
         address indexed creator,
-        address indexed remixContractAddress,
-        address indexed splitAddress
+        address remixContractAddress,
+        address creatorProceedRecipient,
+        address derivativeFeeRecipient
     );
 
     constructor(address _splitMainAddress, address _controller, address _implementation) {
@@ -64,33 +65,42 @@ contract TitlesDeployer {
         string memory _name,
         string memory _symbol, 
         string memory _uri, 
-        address[] memory accounts, 
-        uint32[] memory allocations,
+        address[] memory creatorProceedAccounts, 
+        uint32[] memory creatorProceedAllocations,
+        address[] memory derivativeFeeAccounts, 
+        uint32[] memory derivativeFeeAllocations,
         uint256 _price,
         uint256 _maxSupply,
         uint256 _mintLimitPerWallet,
         uint256 _saleEndTime
     ) public {
 
-        address splitAddress = splitMain.createSplit({
-            accounts: accounts,
-            percentAllocations: allocations,
+
+        // TODO: Logic for if there's only one account in list
+
+        address creatorSplit = splitMain.createSplit({
+            accounts: creatorProceedAccounts,
+            percentAllocations: creatorProceedAllocations,
+            distributorFee: 0,
+            controller: controller
+        });
+
+        address derivativeFeeSplit = splitMain.createSplit({
+            accounts: derivativeFeeAccounts,
+            percentAllocations: derivativeFeeAllocations,
             distributorFee: 0,
             controller: controller
         });
 
         address remixClone = Clones.clone(remixImplementation);
-        ERC721Remix(remixClone).initialize(_creator, _name, _symbol, _uri, splitAddress, _price, _maxSupply, _mintLimitPerWallet, _saleEndTime);
+        ERC721Remix(remixClone).initialize(_creator, _name, _symbol, _uri, creatorSplit, derivativeFeeSplit, _price, _maxSupply, _mintLimitPerWallet, _saleEndTime);
         remixContractArray.push(remixClone);
-
-        // ERC721Remix remixContract = new ERC721Remix(_creator, _name, _symbol, _uri, splitAddress, _price, _maxSupply, _mintLimitPerWallet, _saleEndTime);
-        // address remixContractAddress = address(remixContract);
-        //remixContractArray.push(remixContractAddress);
 
         emit PublishedRemix({
             creator: msg.sender,
             remixContractAddress: remixClone,
-            splitAddress: splitAddress
+            creatorProceedRecipient: creatorSplit,
+            derivativeFeeRecipient: derivativeFeeSplit
         });
     }
 }

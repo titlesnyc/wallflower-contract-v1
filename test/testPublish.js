@@ -48,7 +48,7 @@ describe("TitlesDeployer", function () {
 
 
         // Publish
-        await deployer.publishRemix(creatorAddress, name, symbol, inputUri, accounts, allocations, priceWei, supply, mintLimit, endTime)
+        await deployer.publishRemix(creatorAddress, name, symbol, inputUri, accounts, allocations, accounts, allocations, priceWei, supply, mintLimit, endTime)
         const publishedAddress = await deployer.remixContractArray(0)
 
         console.log("3️⃣ - Published remix")
@@ -77,8 +77,10 @@ describe("TitlesDeployer", function () {
         const masterUri = await remix.remixUri()
         expect(masterUri).to.equal(inputUri);
 
-        const splitAddress = await remix.splitAddress()
-        console.log("Split address:  " + splitAddress)
+        const creatorSplitAddress = await remix.creatorProceedRecipient()
+        console.log("Creator split address:  " + creatorSplitAddress)
+        const derivativeFeeSplitAddress = await remix.derivativeFeeRecipient()
+        console.log("Derivatve Fee split address: " + derivativeFeeSplitAddress)
 
         const ownerAddress = await remix.owner()
         console.log("Owner address: " + ownerAddress)
@@ -172,7 +174,7 @@ describe("TitlesDeployer", function () {
         const [signer] = await ethers.getSigners();
 
         // Publish
-        await deployer.publishRemix(creatorAddress, name, symbol, inputUri, accounts, allocations, priceWei, supply, mintLimit, endTime)
+        await deployer.publishRemix(creatorAddress, name, symbol, inputUri, accounts, allocations, accounts, allocations, priceWei, supply, mintLimit, endTime)
         const publishedAddress = await deployer.remixContractArray(0)
 
         console.log("3️⃣ - Published remix")
@@ -201,8 +203,10 @@ describe("TitlesDeployer", function () {
         const masterUri = await remix.remixUri()
         expect(masterUri).to.equal(inputUri);
 
-        const splitAddress = await remix.splitAddress()
-        console.log("Split address:  " + splitAddress)
+        const creatorSplitAddress = await remix.creatorProceedRecipient()
+        console.log("Creator split address:  " + creatorSplitAddress)
+        const derivativeFeeSplitAddress = await remix.derivativeFeeRecipient()
+        console.log("Derivatve Fee split address: " + derivativeFeeSplitAddress)
 
         const ownerAddress = await remix.owner()
         console.log("Owner address: " + ownerAddress)
