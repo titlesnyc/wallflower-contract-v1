@@ -75,32 +75,48 @@ contract TitlesDeployer {
         uint256 _saleEndTime
     ) public {
 
+        require(creatorProceedAccounts.length > 0, "Empty proceeds array");
+        require(creatorProceedAccounts.length == creatorProceedAllocations.length, "Mismatched proceeds array lengths");
+        require(derivativeFeeAccounts.length > 0, "Empty fee array");
+        require(derivativeFeeAccounts.length == derivativeFeeAllocations.length, "Mismatched fee array lenghts");
 
-        // TODO: Logic for if there's only one account in list
 
-        address creatorSplit = splitMain.createSplit({
-            accounts: creatorProceedAccounts,
-            percentAllocations: creatorProceedAllocations,
-            distributorFee: 0,
-            controller: controller
-        });
+        address proceedRecipient;
+        if (creatorProceedAccounts.length == 1) {
+            proceedRecipient = creatorProceedAccounts[0];
+        } else {
+            address creatorSplit = splitMain.createSplit({
+                accounts: creatorProceedAccounts,
+                percentAllocations: creatorProceedAllocations,
+                distributorFee: 0,
+                controller: controller
+            });
+            proceedRecipient = creatorSplit;
+        }
 
-        address derivativeFeeSplit = splitMain.createSplit({
-            accounts: derivativeFeeAccounts,
-            percentAllocations: derivativeFeeAllocations,
-            distributorFee: 0,
-            controller: controller
-        });
+        address feeRecipient;
+        if (derivativeFeeAccounts.length == 1) {
+            feeRecipient = derivativeFeeAccounts[0];
+        } else {
+            address derivativeFeeSplit = splitMain.createSplit({
+                accounts: derivativeFeeAccounts,
+                percentAllocations: derivativeFeeAllocations,
+                distributorFee: 0,
+                controller: controller
+            });
+            feeRecipient = derivativeFeeSplit;
+        }
+        
 
         address remixClone = Clones.clone(remixImplementation);
-        ERC721Remix(remixClone).initialize(_creator, _name, _symbol, _uri, creatorSplit, derivativeFeeSplit, _price, _maxSupply, _mintLimitPerWallet, _saleEndTime);
+        ERC721Remix(remixClone).initialize(_creator, _name, _symbol, _uri, proceedRecipient, feeRecipient, _price, _maxSupply, _mintLimitPerWallet, _saleEndTime);
         remixContractArray.push(remixClone);
 
         emit PublishedRemix({
             creator: msg.sender,
             remixContractAddress: remixClone,
-            creatorProceedRecipient: creatorSplit,
-            derivativeFeeRecipient: derivativeFeeSplit
+            creatorProceedRecipient: proceedRecipient,
+            derivativeFeeRecipient: feeRecipient
         });
     }
 }

@@ -130,6 +130,69 @@ describe("TitlesDeployer", function () {
 
     });
 
+    it("able to publish with single allocation arrays", async function () {
+
+        const splitMainEthereum = '0x2ed6c4B5dA6378c7897AC67Ba9e43102Feb694EE';
+        const titlesController = '0xd9111EbeC09Ae2cb4778e6278d5959929bAA59Cc'
+
+        console.log("1️⃣ - Test started")
+
+        // Deploy Implementation
+        const RemixImplementation = await hre.ethers.getContractFactory("ERC721Remix");
+        const implementation = await RemixImplementation.deploy();
+
+        console.log("🛠 Implementation deployed: ")
+        console.log(implementation.address)
+
+        // Deploy Deployer
+        const TitlesDeployer = await hre.ethers.getContractFactory("TitlesDeployer");
+        const deployer = await TitlesDeployer.deploy(splitMainEthereum, titlesController, implementation.address);
+
+        console.log("Deployer address: " + deployer)
+        console.log("2️⃣ - Deployed deployer w/ Split Main")
+
+        // Publish Information
+        const creatorAddress = '0x40211097528189E4Aa814bC2d6c76a7117e5a32C'
+        const name = 'Meta'
+        const symbol = 'META'
+        const inputUri = 'https://ipfs.thirdwebcdn.com/ipfs/QmeDPAdEdmrjc9d3NeMt3DzusUDG5BjvrLQSpKgXYcG867/0'
+        const accounts =['0x40211097528189E4Aa814bC2d6c76a7117e5a32C' ]
+        const allocations = [1000000]
+        const priceEth = 0.1
+        const priceWei = ethers.utils.parseUnits(priceEth.toString(), "ether")
+        const supply = 25
+        const mintLimit = 3
+        const endTime = 1686286044
+
+        // check allocations
+        console.log(accounts)
+        const totalAllocations = allocations.reduce((a, b) => a + b)
+        expect(totalAllocations).to.equal(1000000)
+
+        // Get Signer
+        const [signer] = await ethers.getSigners();
+
+        // Publish
+        await deployer.publishRemix(creatorAddress, name, symbol, inputUri, accounts, allocations, accounts, allocations, priceWei, supply, mintLimit, endTime)
+        const publishedAddress = await deployer.remixContractArray(0)
+
+        console.log("3️⃣ - Published remix")
+        console.log("Remix address:  " + publishedAddress)
+
+        const remix = await ethers.getContractAt('ERC721Remix', publishedAddress)
+
+
+        const masterUri = await remix.remixUri()
+        expect(masterUri).to.equal(inputUri);
+
+        const creatorSplitAddress = await remix.creatorProceedRecipient()
+        console.log("Creator split address:  " + creatorSplitAddress)
+        const derivativeFeeSplitAddress = await remix.derivativeFeeRecipient()
+        console.log("Derivatve Fee split address: " + derivativeFeeSplitAddress)
+
+
+    });
+
     it("able to publish a nft from the TITLES app", async function () {
 
         const splitMainEthereum = '0x2ed6c4B5dA6378c7897AC67Ba9e43102Feb694EE';
