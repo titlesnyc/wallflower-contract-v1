@@ -33,18 +33,12 @@ pragma solidity ^0.8.4;
                                                                                @@@@                                                           
 */                                                         
 
-// import {ERC721AUpgradeable} from "erc721a-upgradeable/contracts/ERC721AUpgradeable.sol";
-// import {IERC721AUpgradeable} from "erc721a-upgradeable/contracts/IERC721AUpgradeable.sol";
 import 'erc721a-upgradeable/contracts/ERC721AUpgradeable.sol';
-import "erc721a/contracts/ERC721A.sol";
-// import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
 
 import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
-
 import "@openzeppelin/contracts/proxy/Clones.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 
 import "hardhat/console.sol";
 
@@ -150,7 +144,6 @@ contract ERC721Remix is ERC721AUpgradeable, OwnableUpgradeable {
     }
 
     function _saleActive() internal view returns (bool) {
-        console.log("active?");
         if (saleEndTime == 0) { return true; }
         return saleEndTime > block.timestamp;
     }
