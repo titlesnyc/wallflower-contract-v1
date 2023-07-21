@@ -33,11 +33,9 @@ pragma solidity ^0.8.4;
                                                                                @@@@                                                           
 */                                                         
 
-import 'erc721a-upgradeable/contracts/ERC721AUpgradeable.sol';
-
-import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
+import "erc721a-upgradeable/contracts/ERC721AUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
 import "hardhat/console.sol";
@@ -47,8 +45,7 @@ contract ERC721Remix is ERC721AUpgradeable, OwnableUpgradeable {
     /// @dev This is the max mint batch size for the optimized ERC721A mint contract
     uint256 internal immutable MAX_MINT_BATCH_SIZE = 8;
 
-    using Counters for Counters.Counter;
-    Counters.Counter private _tokenIdCounter;
+    uint256 internal immutable FUNDS_SEND_GAS_LIMIT = 210_000;
 
     bool private _initialized = false;
 
@@ -64,8 +61,8 @@ contract ERC721Remix is ERC721AUpgradeable, OwnableUpgradeable {
     uint256 public saleEndTime;
 
     // Derivative Configuration
-    uint256 public royaltyBps;
-    uint256 public mintFee;
+    uint256 private immutable DERIVATIVE_FEE = 999000000000000;
+    uint256 public immutable ROYALTY_BPS = 0;
     address public creatorProceedRecipient;
     address public derivativeFeeRecipient;
 
@@ -119,7 +116,7 @@ contract ERC721Remix is ERC721AUpgradeable, OwnableUpgradeable {
         }
 
         // Check price
-        uint256 expectedPrice = (price + mintFee) * quantity;
+        uint256 expectedPrice = (price + DERIVATIVE_FEE) * quantity;
         require(msg.value == expectedPrice, "Incorrect purchase price");
 
         // Check limit
@@ -130,6 +127,19 @@ contract ERC721Remix is ERC721AUpgradeable, OwnableUpgradeable {
 
         // Mint!
         _mintNFTs(_msgSender(), quantity);
+
+        // Pay
+        _distributeFunds(msg.value, quantity);
+    }
+
+    function _distributeFunds(uint256 totalFunds, uint256 quantity) internal {
+        uint256 derivativeFee = DERIVATIVE_FEE * quantity;
+        (bool feeSuccess, ) = derivativeFeeRecipient.call{value: derivativeFee, gas: FUNDS_SEND_GAS_LIMIT}("");
+        require(feeSuccess, "Failed to send derivative fee");
+
+        uint256 proceeds = totalFunds - derivativeFee;
+        (bool proceedsSuccess, ) = creatorProceedRecipient.call{value: proceeds, gas: FUNDS_SEND_GAS_LIMIT}("");
+        require(proceedsSuccess, "Failed to send proceeds");
     }
 
     /// Batch in size of 8 for ERC721A
