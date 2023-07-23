@@ -35,12 +35,14 @@ pragma solidity ^0.8.4;
 
 import "erc721a-upgradeable/contracts/ERC721AUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/common/ERC2981Upgradeable.sol";
+// import {IERC2981Upgradeable, IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
 import "hardhat/console.sol";
 
-contract ERC721Remix is ERC721AUpgradeable, OwnableUpgradeable {
+contract ERC721Remix is ERC721AUpgradeable, OwnableUpgradeable, ERC2981Upgradeable {
 
     /// @dev This is the max mint batch size for the optimized ERC721A mint contract
     uint256 internal immutable MAX_MINT_BATCH_SIZE = 8;
@@ -61,8 +63,8 @@ contract ERC721Remix is ERC721AUpgradeable, OwnableUpgradeable {
     uint256 public saleEndTime;
 
     // Derivative Configuration
-    uint256 private immutable DERIVATIVE_FEE = 999000000000000;
-    uint256 public immutable ROYALTY_BPS = 0;
+    uint256 private immutable DERIVATIVE_FEE = 999000000000000; // 0.000999
+    uint96 public immutable ROYALTY_BPS = 1000; // 10%
     address public creatorProceedRecipient;
     address public derivativeFeeRecipient;
 
@@ -94,8 +96,13 @@ contract ERC721Remix is ERC721AUpgradeable, OwnableUpgradeable {
         saleEndTime = _saleEndTime;
 
         transferOwnership(_creator);
+        _setDefaultRoyalty(_creatorProceedRecipient, ROYALTY_BPS);
 
         _initialized = true;
+    }
+
+    function contractURI() external view returns (string memory) {
+        return remixUri;
     }
 
     function _baseURI() internal view override returns (string memory) {
@@ -111,7 +118,8 @@ contract ERC721Remix is ERC721AUpgradeable, OwnableUpgradeable {
         require(_saleActive(), "Sale has ended");
 
         // Check supply
-        if (quantity + _totalMinted() > maxSupply) {
+        if (maxSupply != 0 &&
+            quantity + _totalMinted() > maxSupply) {
             revert("This drop is sold out");
         }
 
@@ -167,4 +175,20 @@ contract ERC721Remix is ERC721AUpgradeable, OwnableUpgradeable {
         require(_exists(tokenId), "invalid token ID");
         return _baseURI();
     }
+
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view    
+        override(
+            ERC721AUpgradeable,
+            ERC2981Upgradeable
+        )
+        returns (bool)
+    {
+        return
+            super.supportsInterface(interfaceId) ||
+            ERC721AUpgradeable.supportsInterface(interfaceId) ||
+            ERC2981Upgradeable.supportsInterface(interfaceId);
+    }
+
 }

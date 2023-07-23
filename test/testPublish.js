@@ -292,7 +292,7 @@ describe("TitlesDeployer", function () {
         const allocations = [600000, 200000, 200000]
         const priceEth = 0.1
         const priceWei = ethers.utils.parseUnits(priceEth.toString(), "ether")
-        const supply = 25
+        const supply = 0
         const mintLimit = 3
         const endTime = 1686286044
 
