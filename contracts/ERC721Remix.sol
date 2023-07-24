@@ -58,8 +58,6 @@ contract ERC721Remix is
 
     // Metadata
     string public remixUri;
-    // _name, _symbol inherited
-    // description is stored in URI
 
     // Sales Configuration
     uint256 public price;
