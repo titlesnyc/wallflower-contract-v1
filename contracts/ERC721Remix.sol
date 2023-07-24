@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.4;
+pragma solidity ^0.8.13;
 
 /*                                                                                                      
                                 @@@@@@@  @@@@@  .                                                                       
@@ -36,13 +36,18 @@ pragma solidity ^0.8.4;
 import "erc721a-upgradeable/contracts/ERC721AUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/common/ERC2981Upgradeable.sol";
-// import {IERC2981Upgradeable, IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
+import "operator-filter-registry/src/upgradeable/DefaultOperatorFiltererUpgradeable.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
 import "hardhat/console.sol";
 
-contract ERC721Remix is ERC721AUpgradeable, OwnableUpgradeable, ERC2981Upgradeable {
+contract ERC721Remix is 
+    ERC721AUpgradeable,  
+    ERC2981Upgradeable, 
+    DefaultOperatorFiltererUpgradeable,
+    OwnableUpgradeable
+{
 
     /// @dev This is the max mint batch size for the optimized ERC721A mint contract
     uint256 internal immutable MAX_MINT_BATCH_SIZE = 8;
@@ -63,7 +68,7 @@ contract ERC721Remix is ERC721AUpgradeable, OwnableUpgradeable, ERC2981Upgradeab
     uint256 public saleEndTime;
 
     // Derivative Configuration
-    uint256 private immutable DERIVATIVE_FEE = 999000000000000; // 0.000999
+    uint256 private immutable DERIVATIVE_FEE = 999000000000000; // 0.000999ETH
     uint96 public immutable ROYALTY_BPS = 1000; // 10%
     address public creatorProceedRecipient;
     address public derivativeFeeRecipient;
@@ -85,7 +90,9 @@ contract ERC721Remix is ERC721AUpgradeable, OwnableUpgradeable, ERC2981Upgradeab
         console.log(msg.sender);
 
         __ERC721A_init(_name, _symbol);
+        __ERC2981_init();
         __Ownable_init();
+        __DefaultOperatorFilterer_init();
 
         remixUri = _uri;
         creatorProceedRecipient = _creatorProceedRecipient;
@@ -174,6 +181,31 @@ contract ERC721Remix is ERC721AUpgradeable, OwnableUpgradeable, ERC2981Upgradeab
     {
         require(_exists(tokenId), "invalid token ID");
         return _baseURI();
+    }
+
+    function setApprovalForAll(address operator, bool approved) public override onlyAllowedOperatorApproval(operator) {
+        super.setApprovalForAll(operator, approved);
+    }
+
+    function approve(address operator, uint256 tokenId) public payable override onlyAllowedOperatorApproval(operator) {
+        super.approve(operator, tokenId);
+    }
+
+    function transferFrom(address from, address to, uint256 tokenId) public payable override onlyAllowedOperator(from) {
+        super.transferFrom(from, to, tokenId);
+    }
+
+    function safeTransferFrom(address from, address to, uint256 tokenId) public payable override onlyAllowedOperator(from) {
+        super.safeTransferFrom(from, to, tokenId);
+    }
+
+    function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory data)
+        public
+        payable
+        override
+        onlyAllowedOperator(from)
+    {
+        super.safeTransferFrom(from, to, tokenId, data);
     }
 
     function supportsInterface(bytes4 interfaceId)

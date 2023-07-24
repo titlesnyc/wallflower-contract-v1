@@ -19,6 +19,7 @@
     "@0xsplits/splits-sdk": "^2.9.0",
     "@openzeppelin/contracts": "^4.8.3",
     "@openzeppelin/contracts-upgradeable": "^4.9.2",
-    "dotenv": "^16.0.3"
+    "dotenv": "^16.0.3",
+    "operator-filter-registry": "^1.4.2"
   }
 }
