@@ -36,6 +36,7 @@ pragma solidity ^0.8.20;
 import "erc721a-upgradeable/contracts/ERC721AUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/common/ERC2981Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "operator-filter-registry/src/upgradeable/DefaultOperatorFiltererUpgradeable.sol";
@@ -47,6 +48,7 @@ import "operator-filter-registry/src/upgradeable/DefaultOperatorFiltererUpgradea
 contract ERC721Remix is 
     ERC721AUpgradeable,  
     ERC2981Upgradeable, 
+    ReentrancyGuardUpgradeable,
     DefaultOperatorFiltererUpgradeable,
     OwnableUpgradeable
 {
@@ -121,6 +123,7 @@ contract ERC721Remix is
 
         __ERC721A_init(_name, _symbol);
         __ERC2981_init();
+        __ReentrancyGuard_init();
         __Ownable_init();
         __DefaultOperatorFilterer_init();
 
@@ -148,7 +151,7 @@ contract ERC721Remix is
      * @notice Purchase a quantity of remix tokens
      * @param quantity Quantity to purchase
      */
-    function purchase(uint256 quantity) external payable {
+    function purchase(uint256 quantity) external payable nonReentrant {
         // Check sale active
         require(_saleActive(), "Sale has ended");
 
