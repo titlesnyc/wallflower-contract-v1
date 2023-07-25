@@ -22,6 +22,15 @@ module.exports = {
         blockNumber: 17237588
       }
     },
+    mainnet: {
+      url: process.env.ALCHEMY_MAINNET_URL,
+      accounts: {
+        mnemonic,
+        path: "m/44'/60'/0'/0",
+        initialIndex: 0,
+        count: 20,
+      },
+    },
     sepolia: {
       url: process.env.ALCHEMY_SEPOLIA_URL,
       accounts: {
