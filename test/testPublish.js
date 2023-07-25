@@ -91,7 +91,7 @@ describe("TitlesDeployer", function () {
         const remixUri = await remix.tokenURI(0)
         expect(remixUri).to.equal(inputUri);
 
-        const masterUri = await remix.remixUri()
+        const masterUri = await remix.contractURI()
         expect(masterUri).to.equal(inputUri);
 
         // Check Money Flow - Purchaser
@@ -166,7 +166,7 @@ describe("TitlesDeployer", function () {
         const TitlesDeployer = await hre.ethers.getContractFactory("TitlesDeployer");
         const deployer = await TitlesDeployer.deploy(splitMainEthereum, titlesController, implementation.address);
 
-        console.log("Deployer address: " + deployer)
+        console.log("Deployer address: " + deployer.address)
         console.log("2️⃣ - Deployed deployer w/ Split Main")
 
         const rainbowDev = '0xd9111EbeC09Ae2cb4778e6278d5959929bAA59Cc'
@@ -234,7 +234,7 @@ describe("TitlesDeployer", function () {
         const remixUri = await remix.tokenURI(0)
         expect(remixUri).to.equal(inputUri);
 
-        const masterUri = await remix.remixUri()
+        const masterUri = await remix.contractURI()
         expect(masterUri).to.equal(inputUri);
 
         // Check Money Flow - Purchaser
@@ -279,7 +279,7 @@ describe("TitlesDeployer", function () {
         const TitlesDeployer = await hre.ethers.getContractFactory("TitlesDeployer");
         const deployer = await TitlesDeployer.deploy(splitMainEthereum, titlesController, implementation.address);
 
-        console.log("Deployer address: " + deployer)
+        console.log("Deployer address: " + deployer.address)
 
         console.log("2️⃣ - Deployed deployer w/ Split Main")
 
@@ -345,7 +345,7 @@ describe("TitlesDeployer", function () {
         const remixUri = await remix.tokenURI(0)
         expect(remixUri).to.equal(inputUri);
 
-        const masterUri = await remix.remixUri()
+        const masterUri = await remix.contractURI()
         expect(masterUri).to.equal(inputUri);
 
         // Check Money Flow - Purchaser
