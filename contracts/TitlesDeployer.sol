@@ -1,4 +1,4 @@
-//SPDX-License-Identifier: Unlicense
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
 /*                                                                                                      
@@ -39,7 +39,7 @@ import {ISplitMain} from "splits-utils/src/interfaces/ISplitMain.sol";
 
 /**
  * @title TITLES Remix Publisher v1
- * @notice A depoloyer that is used to publish new TITLES remix contracts
+ * @notice A deployer that is used to publish new TITLES remix contracts
  * @dev A factory that deploys minimal proxies of `ERC721Remix.sol`
  */
 contract TitlesDeployer {
@@ -109,12 +109,12 @@ contract TitlesDeployer {
         uint256 _maxSupply,
         uint256 _mintLimitPerWallet,
         uint256 _saleEndTime
-    ) public {
+    ) external {
         // Check split configurations
         require(creatorProceedAccounts.length > 0, "Empty proceeds array");
         require(creatorProceedAccounts.length == creatorProceedAllocations.length, "Mismatched proceeds array lengths");
         require(derivativeFeeAccounts.length > 0, "Empty fee array");
-        require(derivativeFeeAccounts.length == derivativeFeeAllocations.length, "Mismatched fee array lenghts");
+        require(derivativeFeeAccounts.length == derivativeFeeAllocations.length, "Mismatched fee array lengths");
 
         // Create proceeds split if needed
         address proceedRecipient;
