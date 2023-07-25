@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.20;
 
 /*                                                                                                      
                                 @@@@@@@  @@@@@  .                                                                       
@@ -36,12 +36,14 @@ pragma solidity ^0.8.13;
 import "erc721a-upgradeable/contracts/ERC721AUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/common/ERC2981Upgradeable.sol";
-import "operator-filter-registry/src/upgradeable/DefaultOperatorFiltererUpgradeable.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
+import "operator-filter-registry/src/upgradeable/DefaultOperatorFiltererUpgradeable.sol";
 
-import "hardhat/console.sol";
-
+/**
+ * @title TITLES Remix ERC721 v1
+ * @notice The TITLES Remix contract v1 - an immutable implementation of ERC721A that distributes proceeds to creators of remixed samples.
+ */
 contract ERC721Remix is 
     ERC721AUpgradeable,  
     ERC2981Upgradeable, 
@@ -49,28 +51,60 @@ contract ERC721Remix is
     OwnableUpgradeable
 {
 
-    /// @dev This is the max mint batch size for the optimized ERC721A mint contract
-    uint256 internal immutable MAX_MINT_BATCH_SIZE = 8;
+    // ================ Configuration ================
+    /// @dev Upper limit to the mint batch size for the ERC721A contract
+    uint256 private immutable MAX_MINT_BATCH_SIZE = 8;
 
-    uint256 internal immutable FUNDS_SEND_GAS_LIMIT = 210_000;
+    /// @dev Gas limit for sending funds
+    uint256 private immutable FUNDS_SEND_GAS_LIMIT = 210_000;
 
+    /// @dev Prevent contract from being reinitialized
     bool private _initialized = false;
 
-    // Metadata
-    string public remixUri;
+    // ================ Edition Metadata ================
+    /// @dev Single metadata URI for the contract
+    string private remixUri;
 
-    // Sales Configuration
+
+    // ================ Sales Configuration ================
+    /// @notice User-set price of drop
     uint256 public price;
+
+    /// @notice User-set maximum number of editions that can be minted for this contract, unbounded if zero
     uint256 public maxSupply;
+
+    /// @notice User-set maximum number of editions that can be minted per wallet, unbounded if zero
     uint256 public mintLimitPerWallet;
+
+    /// @notice User-set date that minting closes as a unix timestamp, unbounded if zero
     uint256 public saleEndTime;
 
-    // Derivative Configuration
+    // ================ Proceeds Configuration ================
+    /// @notice Derivative Fee - charged per mint, paid out to creators of remixed samples
     uint256 private immutable DERIVATIVE_FEE = 999000000000000; // 0.000999ETH
-    uint96 public immutable ROYALTY_BPS = 1000; // 10%
+
+    /// @notice Secondary sale royalty percentage, in BPS
+    uint96 private immutable ROYALTY_BPS = 1000; // 10%
+
+    /// @notice Recipient of primary and secondary sale proceeds, typically a Split
     address public creatorProceedRecipient;
+
+    /// @notice Recipient of Derivative Fees, typically a Split
     address public derivativeFeeRecipient;
 
+    /**
+     * @dev Create a new Remix contract
+     * @param _creator Publisher of the remix
+     * @param _name Contract name 
+     * @param _symbol Contract symbol 
+     * @param _uri Metadata URI 
+     * @param _creatorProceedRecipient Proceeds recipient address
+     * @param _derivativeFeeRecipient Derivative Fee recipient address 
+     * @param _price Price of the edition in wei 
+     * @param _maxSupply Maximum number of editions that can be minted for this contract, unbounded if zero 
+     * @param _mintLimitPerWallet Maximum number of editions that can be minted per wallet, unbounded if zero
+     * @param _saleEndTime Date that minting closes as a unix timestamp, unbounded if zero
+     */
     function initialize(address _creator,
         string memory _name, 
         string memory _symbol, 
@@ -83,9 +117,7 @@ contract ERC721Remix is
         uint256 _saleEndTime
     ) public initializerERC721A initializer {
         require(!_initialized, "Contract instance has already been initialized");
-
-        console.log("sender (init):");
-        console.log(msg.sender);
+        _initialized = true;
 
         __ERC721A_init(_name, _symbol);
         __ERC2981_init();
@@ -100,25 +132,23 @@ contract ERC721Remix is
         mintLimitPerWallet = _mintLimitPerWallet;
         saleEndTime = _saleEndTime;
 
-        transferOwnership(_creator);
         _setDefaultRoyalty(_creatorProceedRecipient, ROYALTY_BPS);
-
-        _initialized = true;
+        transferOwnership(_creator);
     }
 
+    /**
+     * @notice Contract URI getter
+     * @return Contract URI
+     */
     function contractURI() external view returns (string memory) {
-        return remixUri;
+        return _baseURI();
     }
 
-    function _baseURI() internal view override returns (string memory) {
-        return remixUri;
-    }
-
-    function purchase(uint256 quantity) public payable {
-
-        console.log("sender (purchase):");
-        console.log(msg.sender);
-
+    /**
+     * @notice Purchase a quantity of remix tokens
+     * @param quantity Quantity to purchase
+     */
+    function purchase(uint256 quantity) external payable {
         // Check sale active
         require(_saleActive(), "Sale has ended");
 
@@ -135,27 +165,39 @@ contract ERC721Remix is
         // Check limit
         if (mintLimitPerWallet != 0 && 
             _numberMinted(_msgSender()) + quantity > mintLimitPerWallet) {
-            revert("Cannot purchase that many");
+            revert("This wallet cannot purchase that many");
         }
 
-        // Mint!
+        // Mint
         _mintNFTs(_msgSender(), quantity);
 
         // Pay
         _distributeFunds(msg.value, quantity);
     }
 
+    /**
+     * @notice Distribute funds between the derivative fee recipient and remix proceeds recipient
+     * @dev This function should be called as part of any purchase function, with all funds in msg.value distributed here
+     * @param totalFunds Amount of funds to be distributed
+     * @param quantity Quantity of tokens purchased
+     */
     function _distributeFunds(uint256 totalFunds, uint256 quantity) internal {
-        uint256 derivativeFee = DERIVATIVE_FEE * quantity;
-        (bool feeSuccess, ) = derivativeFeeRecipient.call{value: derivativeFee, gas: FUNDS_SEND_GAS_LIMIT}("");
+        uint256 totalDerivativeFee = DERIVATIVE_FEE * quantity;
+        (bool feeSuccess, ) = derivativeFeeRecipient.call{value: totalDerivativeFee, gas: FUNDS_SEND_GAS_LIMIT}("");
         require(feeSuccess, "Failed to send derivative fee");
 
-        uint256 proceeds = totalFunds - derivativeFee;
+        uint256 proceeds = totalFunds - totalDerivativeFee;
         (bool proceedsSuccess, ) = creatorProceedRecipient.call{value: proceeds, gas: FUNDS_SEND_GAS_LIMIT}("");
-        require(proceedsSuccess, "Failed to send proceeds");
+        require(proceedsSuccess, "Failed to send remix proceeds");
     }
 
-    /// Batch in size of 8 for ERC721A
+    /**
+     * @notice Function to mint NFTs
+     * @dev (important: Does not enforce max supply limit, enforce that limit earlier)
+     * @dev This batches in size of 8 as per recommended by ERC721A creators
+     * @param to address to mint NFTs to
+     * @param quantity number of NFTs to mint
+     */
     function _mintNFTs(address to, uint256 quantity) internal {
         do {
             uint256 toMint = quantity > MAX_MINT_BATCH_SIZE
@@ -166,11 +208,29 @@ contract ERC721Remix is
         } while (quantity > 0);
     }
 
+    /**
+     * @notice Check if sale is active
+     * @dev If sale end time is zero, this will always return true
+     * @return Boolean whether the sale is still active
+     */
     function _saleActive() internal view returns (bool) {
         if (saleEndTime == 0) { return true; }
         return saleEndTime > block.timestamp;
     }
 
+    /**
+     * @dev Use a single metadata URI for the remix contract
+     */
+    function _baseURI() internal view override returns (string memory) {
+        return remixUri;
+    }
+
+    /**
+     * @notice Token URI getter
+     * @dev Use a single metadata URI for the remix contract
+     * @param tokenId Id of the token to get URI of
+     * @return Token URI
+     */
     function tokenURI(uint256 tokenId)
         public
         view
@@ -181,22 +241,27 @@ contract ERC721Remix is
         return _baseURI();
     }
 
+    /// @dev See {ERC721-setApprovalForAll}
     function setApprovalForAll(address operator, bool approved) public override onlyAllowedOperatorApproval(operator) {
         super.setApprovalForAll(operator, approved);
     }
 
+    /// @dev See {ERC721-approve}
     function approve(address operator, uint256 tokenId) public payable override onlyAllowedOperatorApproval(operator) {
         super.approve(operator, tokenId);
     }
 
+    /// @dev See {ERC721-transferFrom}
     function transferFrom(address from, address to, uint256 tokenId) public payable override onlyAllowedOperator(from) {
         super.transferFrom(from, to, tokenId);
     }
 
+    /// @dev See {ERC721-safeTransferFrom}
     function safeTransferFrom(address from, address to, uint256 tokenId) public payable override onlyAllowedOperator(from) {
         super.safeTransferFrom(from, to, tokenId);
     }
 
+    /// @dev See {ERC721-safeTransferFrom}
     function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory data)
         public
         payable
@@ -206,6 +271,10 @@ contract ERC721Remix is
         super.safeTransferFrom(from, to, tokenId, data);
     }
 
+    /**
+     * @notice ERC165 supports interface
+     * @param interfaceId interface id to check if supported
+     */
     function supportsInterface(bytes4 interfaceId)
         public
         view    
@@ -220,5 +289,4 @@ contract ERC721Remix is
             ERC721AUpgradeable.supportsInterface(interfaceId) ||
             ERC2981Upgradeable.supportsInterface(interfaceId);
     }
-
 }
