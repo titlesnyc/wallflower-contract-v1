@@ -2,6 +2,7 @@ const { expect } = require("chai");
 const hre = require("hardhat");
 
 const DERIVATIVE_FEE = 0.000999
+const PUBLISH_EVENT_NAME = "PublishedRemix"
 
 // const { SplitsClient } = require('@0xsplits/splits-sdk')
 
@@ -11,6 +12,7 @@ describe("TitlesDeployer", function () {
 
         const splitMainEthereum = '0x2ed6c4B5dA6378c7897AC67Ba9e43102Feb694EE';
         const titlesController = '0xd9111EbeC09Ae2cb4778e6278d5959929bAA59Cc'
+        const distributorFee = 5000
 
         console.log("1️⃣ - Test started")
 
@@ -23,7 +25,7 @@ describe("TitlesDeployer", function () {
 
         // Deploy Deployer
         const TitlesDeployer = await hre.ethers.getContractFactory("TitlesDeployer");
-        const deployer = await TitlesDeployer.deploy(splitMainEthereum, titlesController, implementation.address);
+        const deployer = await TitlesDeployer.deploy(splitMainEthereum, titlesController, distributorFee, implementation.address);
 
         console.log("Deployer address: " + deployer.address)
 
@@ -51,9 +53,12 @@ describe("TitlesDeployer", function () {
 
 
         // Publish
-        await deployer.publishRemix(creatorAddress, name, symbol, inputUri, accounts, allocations, accounts, allocations, priceWei, supply, mintLimit, endTime)
-        const publishedAddress = await deployer.remixContractArray(0)
+        const publishTx = await deployer.publishRemix(creatorAddress, name, symbol, inputUri, accounts, allocations, accounts, allocations, priceWei, supply, mintLimit, endTime)
+        const publishReceipt = await publishTx.wait()
+        const event = publishReceipt.events?.find(e => e.event === PUBLISH_EVENT_NAME)
+        expect(event).to.not.be.undefined;
 
+        const publishedAddress = event.args.remixContractAddress
         console.log("3️⃣ - Published remix")
         console.log("Remix address:  " + publishedAddress)
 
@@ -152,6 +157,7 @@ describe("TitlesDeployer", function () {
 
         const splitMainEthereum = '0x2ed6c4B5dA6378c7897AC67Ba9e43102Feb694EE';
         const titlesController = '0xd9111EbeC09Ae2cb4778e6278d5959929bAA59Cc'
+        const distributorFee = 5000
 
         console.log("1️⃣ - Test started")
 
@@ -164,7 +170,7 @@ describe("TitlesDeployer", function () {
 
         // Deploy Deployer
         const TitlesDeployer = await hre.ethers.getContractFactory("TitlesDeployer");
-        const deployer = await TitlesDeployer.deploy(splitMainEthereum, titlesController, implementation.address);
+        const deployer = await TitlesDeployer.deploy(splitMainEthereum, titlesController, distributorFee, implementation.address);
 
         console.log("Deployer address: " + deployer.address)
         console.log("2️⃣ - Deployed deployer w/ Split Main")
@@ -194,9 +200,12 @@ describe("TitlesDeployer", function () {
         const [signer] = await ethers.getSigners();
 
         // Publish
-        await deployer.publishRemix(creatorAddress, name, symbol, inputUri, proceedAccounts, allocations, feeAccounts, allocations, priceWei, supply, mintLimit, endTime)
-        const publishedAddress = await deployer.remixContractArray(0)
-
+        const publishTx = await deployer.publishRemix(creatorAddress, name, symbol, inputUri, proceedAccounts, allocations, feeAccounts, allocations, priceWei, supply, mintLimit, endTime)
+        const publishReceipt = await publishTx.wait()
+        const event = publishReceipt.events?.find(e => e.event === PUBLISH_EVENT_NAME)
+        expect(event).to.not.be.undefined;
+        
+        const publishedAddress = event.args.remixContractAddress
         console.log("3️⃣ - Published remix")
         console.log("Remix address:  " + publishedAddress)
 
@@ -265,6 +274,7 @@ describe("TitlesDeployer", function () {
 
         const splitMainEthereum = '0x2ed6c4B5dA6378c7897AC67Ba9e43102Feb694EE';
         const titlesController = '0xd9111EbeC09Ae2cb4778e6278d5959929bAA59Cc'
+        const distributorFee = 5000
 
         console.log("1️⃣ - Test started")
 
@@ -277,7 +287,7 @@ describe("TitlesDeployer", function () {
 
         // Deploy Deployer
         const TitlesDeployer = await hre.ethers.getContractFactory("TitlesDeployer");
-        const deployer = await TitlesDeployer.deploy(splitMainEthereum, titlesController, implementation.address);
+        const deployer = await TitlesDeployer.deploy(splitMainEthereum, titlesController, distributorFee, implementation.address);
 
         console.log("Deployer address: " + deployer.address)
 
@@ -305,9 +315,12 @@ describe("TitlesDeployer", function () {
         const [signer] = await ethers.getSigners();
 
         // Publish
-        await deployer.publishRemix(creatorAddress, name, symbol, inputUri, accounts, allocations, accounts, allocations, priceWei, supply, mintLimit, endTime)
-        const publishedAddress = await deployer.remixContractArray(0)
-
+        const publishTx = await deployer.publishRemix(creatorAddress, name, symbol, inputUri, accounts, allocations, accounts, allocations, priceWei, supply, mintLimit, endTime)
+        const publishReceipt = await publishTx.wait()
+        const event = publishReceipt.events?.find(e => e.event === PUBLISH_EVENT_NAME)
+        expect(event).to.not.be.undefined;
+        
+        const publishedAddress = event.args.remixContractAddress
         console.log("3️⃣ - Published remix")
         console.log("Remix address:  " + publishedAddress)
 

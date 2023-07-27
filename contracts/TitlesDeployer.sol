@@ -34,6 +34,7 @@ pragma solidity ^0.8.20;
 */
 
 import "./ERC721Remix.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import {ISplitMain} from "splits-utils/src/interfaces/ISplitMain.sol";
 
@@ -42,18 +43,18 @@ import {ISplitMain} from "splits-utils/src/interfaces/ISplitMain.sol";
  * @notice A deployer that is used to publish new TITLES remix contracts
  * @dev A factory that deploys minimal proxies of `ERC721Remix.sol`
  */
-contract TitlesDeployer {
+contract TitlesDeployer is Ownable {
     /// @notice Address of 0xSplits SplitMain contract to use to create new splits
     ISplitMain public immutable splitMain;
 
-    /// @notice Default address used as Splits controller
+    /// @notice Default address used as Splits controller & Publisher admin
     address private immutable controller;
+
+    /// @notice Distributor fee on Splits to promote automated distribution 
+    uint32 private splitDistributorFee;
 
     /// @notice Address of implementation of ERC721Remix to clone
     address public immutable remixImplementation;
-
-    /// @notice Array of all ERC721Remix contracts published through this deployer
-    address[] public remixContractArray;
 
     /**
      * @notice Emitted when a remix is successfully published
@@ -72,13 +73,16 @@ contract TitlesDeployer {
     /**
      * @notice Initializes the deployer with required addresses
      * @param _splitMainAddress Address of 0xSplits SplitMain contract
-     * @param _controller Default address used as Splits controller
+     * @param _controller Default address used as Splits controller and Publisher admin
      * @param _implementation ERC721Remix base implementation address
      */
-    constructor(address _splitMainAddress, address _controller, address _implementation) {
+    constructor(address _splitMainAddress, address _controller, uint32 _distributorFee, address _implementation) {
         splitMain = ISplitMain(_splitMainAddress);
         controller = _controller;
+        splitDistributorFee = _distributorFee;
         remixImplementation = _implementation;
+
+        transferOwnership(_controller);
     }
 
     /**
@@ -124,7 +128,7 @@ contract TitlesDeployer {
             address creatorSplit = splitMain.createSplit({
                 accounts: creatorProceedAccounts,
                 percentAllocations: creatorProceedAllocations,
-                distributorFee: 0,
+                distributorFee: splitDistributorFee,
                 controller: controller
             });
             proceedRecipient = creatorSplit;
@@ -138,7 +142,7 @@ contract TitlesDeployer {
             address derivativeFeeSplit = splitMain.createSplit({
                 accounts: derivativeFeeAccounts,
                 percentAllocations: derivativeFeeAllocations,
-                distributorFee: 0,
+                distributorFee: splitDistributorFee,
                 controller: controller
             });
             feeRecipient = derivativeFeeSplit;
@@ -148,8 +152,7 @@ contract TitlesDeployer {
         address remixClone = Clones.clone(remixImplementation);
         ERC721Remix(remixClone).initialize(_creator, _name, _symbol, _uri, proceedRecipient, feeRecipient, _price, _maxSupply, _mintLimitPerWallet, _saleEndTime);
 
-        // Save & Notify
-        remixContractArray.push(remixClone);
+        // Emit Event
         emit PublishedRemix({
             creator: msg.sender,
             remixContractAddress: remixClone,
