@@ -95,6 +95,40 @@ contract ERC721Remix is
     address public derivativeFeeRecipient;
 
     /**
+     * @notice Emitted on primary sale of edition
+     * @param to Address that purchased the edition
+     * @param quantity Quantity of tokens purchased
+     * @param pricePerToken Price of each token paid to proceed recipient
+     * @param firstTokenId The id of the first token purchased in this sale
+     */
+    event Sale(
+        address to,
+        uint256 quantity,
+        uint256 pricePerToken,
+        uint256 firstTokenId
+    );
+
+    /**
+     * @notice Emitted when proceeds are paid out from a sale
+     * @param value Amount paid out
+     * @param recipient Proceeds recipient
+     */
+    event ProceedsPayout(
+        uint256 value,
+        address recipient
+    );
+
+    /**
+     * @notice Emitted when Derivative Fee is paid out from a sale
+     * @param value Amount paid out
+     * @param recipient Derivative Fee recipient
+     */
+    event DerivativeFeePayout(
+        uint256 value,
+        address recipient
+    );
+
+    /**
      * @dev Create a new Remix contract
      * @param _creator Publisher of the remix
      * @param _name Contract name 
@@ -176,6 +210,17 @@ contract ERC721Remix is
 
         // Pay
         _distributeFunds(msg.value, quantity);
+
+
+        uint256 lastMintedTokenId = _currentIndex - 1; //TODOOT
+        uint256 firstMintedTokenId = _lastMintedTokenId() - quantity;
+
+        emit Sale({
+            to: _msgSender(),
+            quantity: quantity,
+            pricePerToken: price,
+            firstTokenId: firstMintedTokenId
+        });
     }
 
     /**
@@ -189,9 +234,19 @@ contract ERC721Remix is
         (bool feeSuccess, ) = derivativeFeeRecipient.call{value: totalDerivativeFee, gas: FUNDS_SEND_GAS_LIMIT}("");
         require(feeSuccess, "Failed to send derivative fee");
 
+        emit DerivativeFeePayout({
+            value: totalDerivativeFee,
+            recipient: derivativeFeeRecipient
+        });
+
         uint256 proceeds = totalFunds - totalDerivativeFee;
         (bool proceedsSuccess, ) = creatorProceedRecipient.call{value: proceeds, gas: FUNDS_SEND_GAS_LIMIT}("");
         require(proceedsSuccess, "Failed to send remix proceeds");
+
+        emit ProceedsPayout({
+            value: proceeds,
+            recipient: creatorProceedRecipient
+        });
     }
 
     /**

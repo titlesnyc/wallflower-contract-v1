@@ -48,9 +48,9 @@ contract TitlesDeployer is Ownable {
     ISplitMain public immutable splitMain;
 
     /// @notice Default address used as Splits controller & Publisher admin
-    address private immutable controller;
+    address private controller;
 
-    /// @notice Distributor fee on Splits to promote automated distribution 
+    /// @notice Distributor fee on Splits to promote automated distribution, in BPS
     uint32 private splitDistributorFee;
 
     /// @notice Address of implementation of ERC721Remix to clone
@@ -159,5 +159,21 @@ contract TitlesDeployer is Ownable {
             creatorProceedRecipient: proceedRecipient,
             derivativeFeeRecipient: feeRecipient
         });
+    }
+
+    /**
+     * @notice Update the distributor fee set for new Splits
+     * @param _distributorFee New fee in BPS
+     */
+    function setSplitDistributorFee(uint32 _distributorFee) external onlyOwner {
+        splitDistributorFee = _distributorFee;
+    }
+
+    /**
+     * @notice Update the controller address set for new Splits
+     * @param _controller New Split controller address
+     */
+    function setController(address _controller) external onlyOwner {
+        controller = _controller;
     }
 }
