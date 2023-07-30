@@ -50,8 +50,11 @@ contract TitlesPublisherV1 is Ownable {
     /// @notice Default address used as Splits controller & Publisher admin
     address private controller;
 
-    /// @notice Distributor fee on Splits to promote automated distribution, in BPS
+    /// @notice Distributor fee on Splits to promote automated distribution, in BPS (scale 1_000_000)
     uint32 private splitDistributorFee;
+
+    /// @notice Portion of secondary sales distributed as royalties, in BPS (scale 10_000) 
+    uint96 private secondaryRoyalty;
 
     /// @notice Address of implementation of TitlesEditionV1 to clone
     address public immutable remixImplementation;
@@ -74,12 +77,15 @@ contract TitlesPublisherV1 is Ownable {
      * @notice Initializes the deployer with required addresses
      * @param _splitMainAddress Address of 0xSplits SplitMain contract
      * @param _controller Default address used as Splits controller and Publisher admin
+     * @param _distributorFee Distributor fee on Splits to promote automated distribution, in BPS (scale 1_000_000)
+     * @param _secondaryRoyalty Portion of secondary sales distributed as royalties, in BPS (scale 10_000) 
      * @param _implementation TitlesEditionV1 base implementation address
      */
-    constructor(address _splitMainAddress, address _controller, uint32 _distributorFee, address _implementation) {
+    constructor(address _splitMainAddress, address _controller, uint32 _distributorFee, uint96 _secondaryRoyalty, address _implementation) {
         splitMain = ISplitMain(_splitMainAddress);
         controller = _controller;
         splitDistributorFee = _distributorFee;
+        secondaryRoyalty = _secondaryRoyalty;
         remixImplementation = _implementation;
 
         transferOwnership(_controller);
@@ -92,9 +98,9 @@ contract TitlesPublisherV1 is Ownable {
      * @param _symbol Contract symbol 
      * @param _uri Metadata URI 
      * @param creatorProceedAccounts Array of address to split proceeds with
-     * @param creatorProceedAllocations Array of allocation amounts for proceeds split
+     * @param creatorProceedAllocations Array of allocation amounts for proceeds split, in BPS (scale 1_000_000)
      * @param derivativeFeeAccounts Array of addresses to split Derivative Fee with
-     * @param derivativeFeeAllocations Array of allocation amounts for Derivative Fee split
+     * @param derivativeFeeAllocations Array of allocation amounts for Derivative Fee split, in BPS (scale 1_000_000)
      * @param _price Price of the edition in wei 
      * @param _maxSupply Maximum number of editions that can be minted for this contract, unbounded if zero 
      * @param _mintLimitPerWallet Maximum number of editions that can be minted per wallet, unbounded if zero
@@ -150,7 +156,7 @@ contract TitlesPublisherV1 is Ownable {
         
         // Publish TitlesEditionV1 clone contract
         address remixClone = Clones.clone(remixImplementation);
-        TitlesEditionV1(remixClone).initialize(_creator, _name, _symbol, _uri, proceedRecipient, feeRecipient, _price, _maxSupply, _mintLimitPerWallet, _saleEndTime);
+        TitlesEditionV1(remixClone).initialize(_creator, _name, _symbol, _uri, proceedRecipient, feeRecipient, _price, _maxSupply, _mintLimitPerWallet, _saleEndTime, secondaryRoyalty);
 
         // Emit Event
         emit EditionPublished({
@@ -162,7 +168,7 @@ contract TitlesPublisherV1 is Ownable {
     }
 
     /**
-     * @notice Update the distributor fee set for new Splits
+     * @notice Update the distributor fee set for Splits of new Editions
      * @param _distributorFee New fee in BPS
      */
     function setSplitDistributorFee(uint32 _distributorFee) external onlyOwner {
@@ -170,7 +176,15 @@ contract TitlesPublisherV1 is Ownable {
     }
 
     /**
-     * @notice Update the controller address set for new Splits
+     * @notice Update the secondary sale royalty percentage for new Editions
+     * @param _secondaryRoyalty New secondary royalty, in BPS (scale 10_000)
+     */
+    function setSecondaryRoyalty(uint96 _secondaryRoyalty) external onlyOwner {
+        secondaryRoyalty = _secondaryRoyalty;
+    }
+
+    /**
+     * @notice Update the controller address set for Splits of new Editions
      * @param _controller New Split controller address
      */
     function setController(address _controller) external onlyOwner {

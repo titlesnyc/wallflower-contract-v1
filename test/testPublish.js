@@ -2,6 +2,7 @@ const { expect } = require("chai");
 const hre = require("hardhat");
 
 const DERIVATIVE_FEE = 0.000999
+const ROYALTY_BPS = 1000
 const PUBLISH_EVENT_NAME = "EditionPublished"
 
 // const { SplitsClient } = require('@0xsplits/splits-sdk')
@@ -25,7 +26,7 @@ describe("TitlesPublisher", function () {
 
         // Deploy Deployer
         const TitlesDeployer = await hre.ethers.getContractFactory("TitlesPublisherV1");
-        const deployer = await TitlesDeployer.deploy(splitMainEthereum, titlesController, distributorFee, implementation.address);
+        const deployer = await TitlesDeployer.deploy(splitMainEthereum, titlesController, distributorFee, ROYALTY_BPS, implementation.address);
 
         console.log("Deployer address: " + deployer.address)
 
@@ -170,7 +171,7 @@ describe("TitlesPublisher", function () {
 
         // Deploy Deployer
         const TitlesDeployer = await hre.ethers.getContractFactory("TitlesPublisherV1");
-        const deployer = await TitlesDeployer.deploy(splitMainEthereum, titlesController, distributorFee, implementation.address);
+        const deployer = await TitlesDeployer.deploy(splitMainEthereum, titlesController, distributorFee, ROYALTY_BPS, implementation.address);
 
         console.log("Deployer address: " + deployer.address)
         console.log("2️⃣ - Deployed deployer w/ Split Main")
@@ -287,7 +288,7 @@ describe("TitlesPublisher", function () {
 
         // Deploy Deployer
         const TitlesDeployer = await hre.ethers.getContractFactory("TitlesPublisherV1");
-        const deployer = await TitlesDeployer.deploy(splitMainEthereum, titlesController, distributorFee, implementation.address);
+        const deployer = await TitlesDeployer.deploy(splitMainEthereum, titlesController, distributorFee, ROYALTY_BPS, implementation.address);
 
         console.log("Deployer address: " + deployer.address)
 

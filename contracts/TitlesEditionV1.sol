@@ -77,9 +77,6 @@ contract TitlesEditionV1 is
     /// @notice Derivative Fee - charged per mint, paid out to creators of remixed samples
     uint256 private immutable DERIVATIVE_FEE = 999000000000000; // 0.000999ETH
 
-    /// @notice Secondary sale royalty percentage, in BPS
-    uint96 private immutable ROYALTY_BPS = 1000; // 10%
-
     /// @notice Recipient of primary and secondary sale proceeds, typically a Split
     address public creatorProceedRecipient;
 
@@ -149,6 +146,7 @@ contract TitlesEditionV1 is
      * @param _maxSupply Maximum number of editions that can be minted for this contract, unbounded if zero 
      * @param _mintLimitPerWallet Maximum number of editions that can be minted per wallet, unbounded if zero
      * @param _saleEndTime Date that minting closes as a unix timestamp, unbounded if zero
+     * @param _secondaryRoyaltyBps Portion of secondary sales distributed as royalties, in BPS (scale 10_000) 
      */
     function initialize(address _creator,
         string memory _name, 
@@ -159,7 +157,8 @@ contract TitlesEditionV1 is
         uint256 _price,
         uint256 _maxSupply,
         uint256 _mintLimitPerWallet,
-        uint256 _saleEndTime
+        uint256 _saleEndTime,
+        uint96 _secondaryRoyaltyBps
     ) public initializerERC721A initializer {
         __ERC721A_init(_name, _symbol);
         __ERC2981_init();
@@ -175,7 +174,7 @@ contract TitlesEditionV1 is
         mintLimitPerWallet = _mintLimitPerWallet;
         saleEndTime = _saleEndTime;
 
-        _setDefaultRoyalty(_creatorProceedRecipient, ROYALTY_BPS);
+        _setDefaultRoyalty(_creatorProceedRecipient, _secondaryRoyaltyBps);
         transferOwnership(_creator);
     }
 
