@@ -33,17 +33,17 @@ pragma solidity ^0.8.20;
                                                                                @@@@                                                           
 */
 
-import "./ERC721Remix.sol";
+import "./TitlesEditionV1.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import {ISplitMain} from "splits-utils/src/interfaces/ISplitMain.sol";
 
 /**
- * @title TITLES Remix Publisher v1
- * @notice A deployer that is used to publish new TITLES remix contracts
- * @dev A factory that deploys minimal proxies of `ERC721Remix.sol`
+ * @title TITLES Edition Publisher v1
+ * @notice A deployer that is used to publish new TITLES Edition contracts
+ * @dev A factory that deploys minimal proxies of `TitlesEditionV1.sol`
  */
-contract TitlesDeployer is Ownable {
+contract TitlesPublisherV1 is Ownable {
     /// @notice Address of 0xSplits SplitMain contract to use to create new splits
     ISplitMain public immutable splitMain;
 
@@ -53,7 +53,7 @@ contract TitlesDeployer is Ownable {
     /// @notice Distributor fee on Splits to promote automated distribution, in BPS
     uint32 private splitDistributorFee;
 
-    /// @notice Address of implementation of ERC721Remix to clone
+    /// @notice Address of implementation of TitlesEditionV1 to clone
     address public immutable remixImplementation;
 
     /**
@@ -63,7 +63,7 @@ contract TitlesDeployer is Ownable {
      * @param creatorProceedRecipient Address of the recipient for primary and secondary royalty proceeds, typically a Split
      * @param derivativeFeeRecipient Address of the recipient of Derivative Fees, typically a Split
      */
-    event PublishedRemix(
+    event EditionPublished(
         address indexed creator,
         address remixContractAddress,
         address creatorProceedRecipient,
@@ -74,7 +74,7 @@ contract TitlesDeployer is Ownable {
      * @notice Initializes the deployer with required addresses
      * @param _splitMainAddress Address of 0xSplits SplitMain contract
      * @param _controller Default address used as Splits controller and Publisher admin
-     * @param _implementation ERC721Remix base implementation address
+     * @param _implementation TitlesEditionV1 base implementation address
      */
     constructor(address _splitMainAddress, address _controller, uint32 _distributorFee, address _implementation) {
         splitMain = ISplitMain(_splitMainAddress);
@@ -86,7 +86,7 @@ contract TitlesDeployer is Ownable {
     }
 
     /**
-     * @notice Publishes a new ERC721Remix clone, creating Splits for sample attribution
+     * @notice Publishes a new TitlesEditionV1 clone, creating Splits for sample attribution
      * @param _creator Publisher of the remix
      * @param _name Contract name 
      * @param _symbol Contract symbol 
@@ -100,7 +100,7 @@ contract TitlesDeployer is Ownable {
      * @param _mintLimitPerWallet Maximum number of editions that can be minted per wallet, unbounded if zero
      * @param _saleEndTime Date that minting closes as a unix timestamp, unbounded if zero
      */
-    function publishRemix(
+    function publishEdition(
         address _creator,
         string memory _name,
         string memory _symbol, 
@@ -148,12 +148,12 @@ contract TitlesDeployer is Ownable {
             feeRecipient = derivativeFeeSplit;
         }
         
-        // Publish ERC721Remix clone contract
+        // Publish TitlesEditionV1 clone contract
         address remixClone = Clones.clone(remixImplementation);
-        ERC721Remix(remixClone).initialize(_creator, _name, _symbol, _uri, proceedRecipient, feeRecipient, _price, _maxSupply, _mintLimitPerWallet, _saleEndTime);
+        TitlesEditionV1(remixClone).initialize(_creator, _name, _symbol, _uri, proceedRecipient, feeRecipient, _price, _maxSupply, _mintLimitPerWallet, _saleEndTime);
 
         // Emit Event
-        emit PublishedRemix({
+        emit EditionPublished({
             creator: msg.sender,
             remixContractAddress: remixClone,
             creatorProceedRecipient: proceedRecipient,

@@ -7,11 +7,11 @@
         const distributorFee = 5000
 
         // Deploy implementation
-        const RemixImplementation = await hre.ethers.getContractFactory("ERC721Remix");
+        const RemixImplementation = await hre.ethers.getContractFactory("TitlesEditionV1");
         const implementation = await RemixImplementation.deploy();
 
         // Deploy deployer
-        const TitlesDeployer = await hre.ethers.getContractFactory("TitlesDeployer");
+        const TitlesDeployer = await hre.ethers.getContractFactory("TitlesPublisherV1");
         const deployer = await TitlesDeployer.deploy(splitMainEthereum, titlesController, distributorFee, implementation.address);
     
         await implementation.deployed();

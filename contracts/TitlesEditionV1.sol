@@ -37,36 +37,28 @@ import "erc721a-upgradeable/contracts/ERC721AUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/common/ERC2981Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
-import "@openzeppelin/contracts/proxy/Clones.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
+import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 import "operator-filter-registry/src/upgradeable/DefaultOperatorFiltererUpgradeable.sol";
 
 /**
- * @title TITLES Remix ERC721 v1
- * @notice The TITLES Remix contract v1 - an immutable implementation of ERC721A that distributes proceeds to creators of remixed samples.
+ * @title TITLES Edition ERC721 v1
+ * @notice The TITLES Edition contract is an immutable ERC721 implementation that splits a share of proceeds amongst creators of samples used in its creation
+ * @dev An immutable implementation of ERC721A
  */
-contract ERC721Remix is 
+contract TitlesEditionV1 is 
     ERC721AUpgradeable,  
     ERC2981Upgradeable, 
     ReentrancyGuardUpgradeable,
     DefaultOperatorFiltererUpgradeable,
     OwnableUpgradeable
 {
-
     // ================ Configuration ================
     /// @dev Upper limit to the mint batch size for the ERC721A contract
     uint256 private immutable MAX_MINT_BATCH_SIZE = 8;
 
-    /// @dev Gas limit for sending funds
-    uint256 private immutable FUNDS_SEND_GAS_LIMIT = 210_000;
-
-    /// @dev Prevent contract from being reinitialized
-    bool private _initialized = false;
-
     // ================ Edition Metadata ================
     /// @dev Single metadata URI for the contract
     string private remixUri;
-
 
     // ================ Sales Configuration ================
     /// @notice User-set price of drop
@@ -129,16 +121,25 @@ contract ERC721Remix is
     );
 
     /**
-     * @notice Emitted when the Sale config data gets updated
-     * @param updatedBy The address that updated the data 
+     * @notice Emitted when funds are withdrawn from the contract
+     * @param withdrawnBy Address that funds are withdrawn to
+     * @param amount Amount of funds withdrawn
      */
-    event SaleConfigUpdated(
-        address indexed updatedBy
+    event FundsWithdrawal(
+        address indexed withdrawnBy,
+        uint256 amount
     );
 
     /**
-     * @dev Create a new Remix contract
-     * @param _creator Publisher of the remix
+     * @dev Constructor to prevent initialization of base implementation 
+     */
+    constructor() {
+        _disableInitializers();
+    }
+
+    /**
+     * @dev Create a new TITLES Edition contract
+     * @param _creator Publisher of the edition
      * @param _name Contract name 
      * @param _symbol Contract symbol 
      * @param _uri Metadata URI 
@@ -160,14 +161,11 @@ contract ERC721Remix is
         uint256 _mintLimitPerWallet,
         uint256 _saleEndTime
     ) public initializerERC721A initializer {
-        require(!_initialized, "Contract instance has already been initialized");
-        _initialized = true;
-
         __ERC721A_init(_name, _symbol);
         __ERC2981_init();
         __ReentrancyGuard_init();
-        __Ownable_init();
         __DefaultOperatorFilterer_init();
+        __Ownable_init();
 
         remixUri = _uri;
         creatorProceedRecipient = _creatorProceedRecipient;
@@ -190,7 +188,7 @@ contract ERC721Remix is
     }
 
     /**
-     * @notice Purchase a quantity of remix tokens
+     * @notice Purchase a quantity of edition tokens
      * @param quantity Quantity to purchase
      */
     function purchase(uint256 quantity) external payable nonReentrant {
@@ -215,7 +213,7 @@ contract ERC721Remix is
 
         // Mint
         _mintNFTs(_msgSender(), quantity);
-        uint256 firstMintedTokenId = _lastMintedTokenId() - quantity;
+        uint256 firstMintedTokenId = _lastMintedTokenId() - (quantity - 1);
 
         // Pay
         _distributeFunds(msg.value, quantity);
@@ -229,14 +227,14 @@ contract ERC721Remix is
     }
 
     /**
-     * @notice Distribute funds between the derivative fee recipient and remix proceeds recipient
+     * @notice Distribute funds between the derivative fee recipient and proceeds recipient
      * @dev This function should be called as part of any purchase function, with all funds in msg.value distributed here
      * @param totalFunds Amount of funds to be distributed
      * @param quantity Quantity of tokens purchased
      */
     function _distributeFunds(uint256 totalFunds, uint256 quantity) internal {
         uint256 totalDerivativeFee = DERIVATIVE_FEE * quantity;
-        (bool feeSuccess, ) = derivativeFeeRecipient.call{value: totalDerivativeFee, gas: FUNDS_SEND_GAS_LIMIT}("");
+        (bool feeSuccess, ) = derivativeFeeRecipient.call{value: totalDerivativeFee}("");
         require(feeSuccess, "Failed to send derivative fee");
 
         emit DerivativeFeePayout({
@@ -245,8 +243,8 @@ contract ERC721Remix is
         });
 
         uint256 proceeds = totalFunds - totalDerivativeFee;
-        (bool proceedsSuccess, ) = creatorProceedRecipient.call{value: proceeds, gas: FUNDS_SEND_GAS_LIMIT}("");
-        require(proceedsSuccess, "Failed to send remix proceeds");
+        (bool proceedsSuccess, ) = creatorProceedRecipient.call{value: proceeds}("");
+        require(proceedsSuccess, "Failed to send purchase proceeds");
 
         emit ProceedsPayout({
             value: proceeds,
@@ -289,7 +287,7 @@ contract ERC721Remix is
     }
 
     /**
-     * @dev Use a single metadata URI for the remix contract
+     * @dev Use a single metadata URI for the contract
      */
     function _baseURI() internal view override returns (string memory) {
         return remixUri;
@@ -297,7 +295,7 @@ contract ERC721Remix is
 
     /**
      * @notice Token URI getter
-     * @dev Use a single metadata URI for the remix contract
+     * @dev Use a single metadata URI for tokens on the contract
      * @param tokenId Id of the token to get URI of
      * @return Token URI
      */
@@ -312,25 +310,20 @@ contract ERC721Remix is
     }
 
     /**
-     * @notice Update the sale configuration
-     * @param _price New sale price
-     * @param _maxSupply New max supply available
-     * @param _mintLimitPerWallet New mint limit per wallet
-     * @param _saleEndTime New sale end time as unix timestamp
+     * @notice Withdraw ETH from the contract to the owner. 
+     * @notice As funds are automatically distributed during purchase, there generally shouldn't be any funds stored in the contract.
      */
-    function setSaleConfig(
-        uint256 _price,
-        uint256 _maxSupply,
-        uint256 _mintLimitPerWallet,
-        uint256 _saleEndTime
-    ) external onlyOwner {
-        price = _price;
-        maxSupply = _maxSupply;
-        mintLimitPerWallet = _mintLimitPerWallet;
-        saleEndTime = _saleEndTime;
+    function withdrawETH() external onlyOwner nonReentrant {
+        uint256 funds = address(this).balance;
+        address recipient = owner();
+        require(recipient == _msgSender(), "Not authorized to withdraw");
 
-        emit SaleConfigUpdated({
-            updatedBy: _msgSender()
+        (bool withdrawSuccess, ) = recipient.call{value: funds}("");
+        require(withdrawSuccess, "Failed to withdraw contract funds");
+
+        emit FundsWithdrawal({
+            withdrawnBy: recipient,
+            amount: funds
         });
     }
 

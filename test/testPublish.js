@@ -2,12 +2,12 @@ const { expect } = require("chai");
 const hre = require("hardhat");
 
 const DERIVATIVE_FEE = 0.000999
-const PUBLISH_EVENT_NAME = "PublishedRemix"
+const PUBLISH_EVENT_NAME = "EditionPublished"
 
 // const { SplitsClient } = require('@0xsplits/splits-sdk')
 
 
-describe("TitlesDeployer", function () {
+describe("TitlesPublisher", function () {
     it("able to publish a Titles Remix", async function () {
 
         const splitMainEthereum = '0x2ed6c4B5dA6378c7897AC67Ba9e43102Feb694EE';
@@ -17,14 +17,14 @@ describe("TitlesDeployer", function () {
         console.log("1️⃣ - Test started")
 
         // Deploy Implementation
-        const RemixImplementation = await hre.ethers.getContractFactory("ERC721Remix");
+        const RemixImplementation = await hre.ethers.getContractFactory("TitlesEditionV1");
         const implementation = await RemixImplementation.deploy();
 
         console.log("🛠 Implementation deployed: ")
         console.log(implementation.address)
 
         // Deploy Deployer
-        const TitlesDeployer = await hre.ethers.getContractFactory("TitlesDeployer");
+        const TitlesDeployer = await hre.ethers.getContractFactory("TitlesPublisherV1");
         const deployer = await TitlesDeployer.deploy(splitMainEthereum, titlesController, distributorFee, implementation.address);
 
         console.log("Deployer address: " + deployer.address)
@@ -53,7 +53,7 @@ describe("TitlesDeployer", function () {
 
 
         // Publish
-        const publishTx = await deployer.publishRemix(creatorAddress, name, symbol, inputUri, accounts, allocations, accounts, allocations, priceWei, supply, mintLimit, endTime)
+        const publishTx = await deployer.publishEdition(creatorAddress, name, symbol, inputUri, accounts, allocations, accounts, allocations, priceWei, supply, mintLimit, endTime)
         const publishReceipt = await publishTx.wait()
         const event = publishReceipt.events?.find(e => e.event === PUBLISH_EVENT_NAME)
         expect(event).to.not.be.undefined;
@@ -62,7 +62,7 @@ describe("TitlesDeployer", function () {
         console.log("3️⃣ - Published remix")
         console.log("Remix address:  " + publishedAddress)
 
-        const remix = await ethers.getContractAt('ERC721Remix', publishedAddress)
+        const remix = await ethers.getContractAt('TitlesEditionV1', publishedAddress)
 
         // Get Addresses
         const creatorSplitAddress = await remix.creatorProceedRecipient()
@@ -162,14 +162,14 @@ describe("TitlesDeployer", function () {
         console.log("1️⃣ - Test started")
 
         // Deploy Implementation
-        const RemixImplementation = await hre.ethers.getContractFactory("ERC721Remix");
+        const RemixImplementation = await hre.ethers.getContractFactory("TitlesEditionV1");
         const implementation = await RemixImplementation.deploy();
 
         console.log("🛠 Implementation deployed: ")
         console.log(implementation.address)
 
         // Deploy Deployer
-        const TitlesDeployer = await hre.ethers.getContractFactory("TitlesDeployer");
+        const TitlesDeployer = await hre.ethers.getContractFactory("TitlesPublisherV1");
         const deployer = await TitlesDeployer.deploy(splitMainEthereum, titlesController, distributorFee, implementation.address);
 
         console.log("Deployer address: " + deployer.address)
@@ -200,7 +200,7 @@ describe("TitlesDeployer", function () {
         const [signer] = await ethers.getSigners();
 
         // Publish
-        const publishTx = await deployer.publishRemix(creatorAddress, name, symbol, inputUri, proceedAccounts, allocations, feeAccounts, allocations, priceWei, supply, mintLimit, endTime)
+        const publishTx = await deployer.publishEdition(creatorAddress, name, symbol, inputUri, proceedAccounts, allocations, feeAccounts, allocations, priceWei, supply, mintLimit, endTime)
         const publishReceipt = await publishTx.wait()
         const event = publishReceipt.events?.find(e => e.event === PUBLISH_EVENT_NAME)
         expect(event).to.not.be.undefined;
@@ -209,7 +209,7 @@ describe("TitlesDeployer", function () {
         console.log("3️⃣ - Published remix")
         console.log("Remix address:  " + publishedAddress)
 
-        const remix = await ethers.getContractAt('ERC721Remix', publishedAddress)
+        const remix = await ethers.getContractAt('TitlesEditionV1', publishedAddress)
 
         // Get Addresses
         const creatorSplitAddress = await remix.creatorProceedRecipient()
@@ -279,14 +279,14 @@ describe("TitlesDeployer", function () {
         console.log("1️⃣ - Test started")
 
         // Deploy Implementation
-        const RemixImplementation = await hre.ethers.getContractFactory("ERC721Remix");
+        const RemixImplementation = await hre.ethers.getContractFactory("TitlesEditionV1");
         const implementation = await RemixImplementation.deploy();
 
         console.log("🛠 Implementation deployed: ")
         console.log(implementation.address)
 
         // Deploy Deployer
-        const TitlesDeployer = await hre.ethers.getContractFactory("TitlesDeployer");
+        const TitlesDeployer = await hre.ethers.getContractFactory("TitlesPublisherV1");
         const deployer = await TitlesDeployer.deploy(splitMainEthereum, titlesController, distributorFee, implementation.address);
 
         console.log("Deployer address: " + deployer.address)
@@ -315,7 +315,7 @@ describe("TitlesDeployer", function () {
         const [signer] = await ethers.getSigners();
 
         // Publish
-        const publishTx = await deployer.publishRemix(creatorAddress, name, symbol, inputUri, accounts, allocations, accounts, allocations, priceWei, supply, mintLimit, endTime)
+        const publishTx = await deployer.publishEdition(creatorAddress, name, symbol, inputUri, accounts, allocations, accounts, allocations, priceWei, supply, mintLimit, endTime)
         const publishReceipt = await publishTx.wait()
         const event = publishReceipt.events?.find(e => e.event === PUBLISH_EVENT_NAME)
         expect(event).to.not.be.undefined;
@@ -324,7 +324,7 @@ describe("TitlesDeployer", function () {
         console.log("3️⃣ - Published remix")
         console.log("Remix address:  " + publishedAddress)
 
-        const remix = await ethers.getContractAt('ERC721Remix', publishedAddress)
+        const remix = await ethers.getContractAt('TitlesEditionV1', publishedAddress)
 
         // Get Addresses
         const creatorSplitAddress = await remix.creatorProceedRecipient()
