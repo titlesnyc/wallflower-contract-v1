@@ -129,6 +129,14 @@ contract ERC721Remix is
     );
 
     /**
+     * @notice Emitted when the Sale config data gets updated
+     * @param updatedBy The address that updated the data 
+     */
+    event SaleConfigUpdated(
+        address indexed updatedBy
+    );
+
+    /**
      * @dev Create a new Remix contract
      * @param _creator Publisher of the remix
      * @param _name Contract name 
@@ -207,13 +215,10 @@ contract ERC721Remix is
 
         // Mint
         _mintNFTs(_msgSender(), quantity);
+        uint256 firstMintedTokenId = _lastMintedTokenId() - quantity;
 
         // Pay
         _distributeFunds(msg.value, quantity);
-
-
-        uint256 lastMintedTokenId = _currentIndex - 1; //TODOOT
-        uint256 firstMintedTokenId = _lastMintedTokenId() - quantity;
 
         emit Sale({
             to: _msgSender(),
@@ -277,6 +282,13 @@ contract ERC721Remix is
     }
 
     /**
+     * @dev  Getter for last minted token ID (gets next token id and subtracts 1)
+     */
+    function _lastMintedTokenId() internal view returns (uint256) {
+        return _nextTokenId() - 1;
+    }
+
+    /**
      * @dev Use a single metadata URI for the remix contract
      */
     function _baseURI() internal view override returns (string memory) {
@@ -297,6 +309,29 @@ contract ERC721Remix is
     {
         require(_exists(tokenId), "invalid token ID");
         return _baseURI();
+    }
+
+    /**
+     * @notice Update the sale configuration
+     * @param _price New sale price
+     * @param _maxSupply New max supply available
+     * @param _mintLimitPerWallet New mint limit per wallet
+     * @param _saleEndTime New sale end time as unix timestamp
+     */
+    function setSaleConfig(
+        uint256 _price,
+        uint256 _maxSupply,
+        uint256 _mintLimitPerWallet,
+        uint256 _saleEndTime
+    ) external onlyOwner {
+        price = _price;
+        maxSupply = _maxSupply;
+        mintLimitPerWallet = _mintLimitPerWallet;
+        saleEndTime = _saleEndTime;
+
+        emit SaleConfigUpdated({
+            updatedBy: _msgSender()
+        });
     }
 
     /// @dev See {ERC721-setApprovalForAll}
