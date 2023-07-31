@@ -10,16 +10,37 @@ const PUBLISH_EVENT_NAME = "EditionPublished"
 const splitMainEthereum = '0x2ed6c4B5dA6378c7897AC67Ba9e43102Feb694EE';
 const titlesController = '0xd9111EbeC09Ae2cb4778e6278d5959929bAA59Cc'
 const distributorFee = 5000
-const ROYALTY_BPS = 1000
+const royaltyBps = 1000
 
 // Contract interaction
 const DERIVATIVE_FEE = 0.000999
 
 
 describe("TitlesPublisher", function () {
+    it("transfers ownership to controller on construction", async function () {
+        const [signer] = await ethers.getSigners()
+
+        // Deploy
+        const deployer = await deployContractsStandardConfig()
+
+        // Check Owner
+        const ownerAddress = await deployer.owner()
+        console.log("signer: " + signer.address)
+        console.log("Owner: " + ownerAddress)
+        expect(ownerAddress).to.equal(titlesController)
+
+    });
+    it("is unable to be modifed by a non-owner", async function () {
+        //doot
+    });
+
+});
+
+
+describe("TitlesPublisher", function () {
     it("able to publish a Titles Remix", async function () {
         // Deploy Contracts
-        const deployer = await deployContracts()
+        const deployer = await deployContractsStandardConfig()
 
         // Publish Information
         const rainbowDev = '0xd9111EbeC09Ae2cb4778e6278d5959929bAA59Cc'
@@ -75,7 +96,7 @@ describe("TitlesPublisher", function () {
 
     it("able to publish with single allocation arrays", async function () {
         // Deploy
-        const deployer = await deployContracts()
+        const deployer = await deployContractsStandardConfig()
 
         // Publish Information
         const rainbowDev = '0xd9111EbeC09Ae2cb4778e6278d5959929bAA59Cc'
@@ -123,7 +144,7 @@ describe("TitlesPublisher", function () {
 
     it("able to publish a nft from the TITLES app", async function () {
         // Deploy Contracts
-        const deployer = await deployContracts()
+        const deployer = await deployContractsStandardConfig()
 
         // Publish Information
         const priceEth = 0.1
@@ -168,7 +189,7 @@ describe("TitlesPublisher", function () {
     });
 });
 
-async function deployContracts() {
+async function deployContractsStandardConfig() {
     console.log("1️⃣ - Starting deployment")
 
     // Deploy Implementation
@@ -176,9 +197,13 @@ async function deployContracts() {
     console.log("🛠 Implementation address: " + implementation.address)
 
     // Deploy Deployer
-    const deployer = await hre.ethers.deployContract(DEPLOYER_CONTRACT_NAME, [splitMainEthereum, titlesController, distributorFee, ROYALTY_BPS, implementation.address]);
+    const deployer = await hre.ethers.deployContract(DEPLOYER_CONTRACT_NAME, [splitMainEthereum, titlesController, distributorFee, royaltyBps, implementation.address]);
     console.log("🛠 Deployer address: " + deployer.address)
     console.log("2️⃣ - Deployed deployer")
+
+    // Check Base Implementation
+    const baseImplementation = await deployer.titlesEditionImplementation()
+    expect(baseImplementation).to.equal(implementation.address)
 
     return deployer
 }

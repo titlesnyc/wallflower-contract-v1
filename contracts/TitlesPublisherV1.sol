@@ -57,7 +57,7 @@ contract TitlesPublisherV1 is Ownable {
     uint96 private secondaryRoyalty;
 
     /// @notice Address of implementation of TitlesEditionV1 to clone
-    address public immutable remixImplementation;
+    address public immutable titlesEditionImplementation;
 
     /**
      * @notice Emitted when a remix is successfully published
@@ -86,7 +86,7 @@ contract TitlesPublisherV1 is Ownable {
         controller = _controller;
         splitDistributorFee = _distributorFee;
         secondaryRoyalty = _secondaryRoyalty;
-        remixImplementation = _implementation;
+        titlesEditionImplementation = _implementation;
 
         transferOwnership(_controller);
     }
@@ -155,7 +155,7 @@ contract TitlesPublisherV1 is Ownable {
         }
         
         // Publish TitlesEditionV1 clone contract
-        address remixClone = Clones.clone(remixImplementation);
+        address remixClone = Clones.clone(titlesEditionImplementation);
         TitlesEditionV1(remixClone).initialize(_creator, _name, _symbol, _uri, proceedRecipient, feeRecipient, _price, _maxSupply, _mintLimitPerWallet, _saleEndTime, secondaryRoyalty);
 
         // Emit Event
