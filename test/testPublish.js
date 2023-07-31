@@ -42,6 +42,13 @@ async function getPublishedAddress(publishTx) {
     return publishedAddress
 }
 
+function checkAllocations(input) {
+    const totalProceedAllocation = input.proceedAllocations.reduce((a, b) => a + b)
+    expect(totalProceedAllocation).to.equal(1000000)
+    const totalFeeAllocation = input.feeAllocations.reduce((a, b) => a + b)
+    expect(totalFeeAllocation).to.equal(1000000)
+}
+
 async function testPurchase(publishedAddress, input) {
     // Get Signer
     const [signer] = await ethers.getSigners();
@@ -119,7 +126,6 @@ describe("TitlesPublisher", function () {
         const priceEth = 0.1
         const [signer] = await ethers.getSigners();
 
-
         const input = {
             creatorAddress: signer.address,
             name: 'Test Name',
@@ -130,9 +136,13 @@ describe("TitlesPublisher", function () {
             supply: 10,
             mintLimit: 2,
             endTime: 0,
-            accounts: [rainbowDev, metamaskDev],
-            allocations: [700000, 300000]
+            proceedAccounts: [rainbowDev, metamaskDev],
+            proceedAllocations: [700000, 300000],
+            feeAccounts: [rainbowDev, metamaskDev],
+            feeAllocations: [700000, 300000]
         }
+
+        checkAllocations(input)
 
         // Publish
         const publishTx = await deployer.publishEdition(
@@ -140,10 +150,10 @@ describe("TitlesPublisher", function () {
             input.name, 
             input.symbol, 
             input.uri,
-            input.accounts, 
-            input.allocations, 
-            input.accounts, 
-            input.allocations, 
+            input.proceedAccounts, 
+            input.proceedAllocations, 
+            input.feeAccounts, 
+            input.feeAllocations, 
             input.priceWei, 
             input.supply, 
             input.mintLimit, 
@@ -182,13 +192,12 @@ describe("TitlesPublisher", function () {
             mintLimit: 3,
             endTime: 1686286044,
             proceedAccounts: [rainbowDev],
+            proceedAllocations: [1000000],
             feeAccounts: [metamaskDev],
-            allocations: [1000000]
+            feeAllocations: [1000000]
         }
 
-        // check allocations
-        const totalAllocations = input.allocations.reduce((a, b) => a + b)
-        expect(totalAllocations).to.equal(1000000)
+        checkAllocations(input)
 
         // Publish
         const publishTx = await deployer.publishEdition(
@@ -197,9 +206,9 @@ describe("TitlesPublisher", function () {
             input.symbol, 
             input.uri, 
             input.proceedAccounts, 
-            input.allocations, 
+            input.proceedAllocations, 
             input.feeAccounts, 
-            input.allocations, 
+            input.feeAllocations, 
             input.priceWei, 
             input.supply, 
             input.mintLimit, 
@@ -212,94 +221,48 @@ describe("TitlesPublisher", function () {
     });
 
     it("able to publish a nft from the TITLES app", async function () {
-
-        // Get Signer
-        const [signer] = await ethers.getSigners();
-        console.log("Signer address: " + signer.address)
-
         // Deploy Contracts
         const deployer = await deployContracts()
 
         // Publish Information
-        const creatorAddress = '0x40211097528189E4Aa814bC2d6c76a7117e5a32C'
-        const name = 'Meta'
-        const symbol = 'META'
-        const inputUri = 'https://ipfs.thirdwebcdn.com/ipfs/QmeDPAdEdmrjc9d3NeMt3DzusUDG5BjvrLQSpKgXYcG867/0'
-        const accounts =['0x40211097528189E4Aa814bC2d6c76a7117e5a32C', '0xF2254525E9f2147990279BA450fb23432040dfdd', '0xFFe7FAc6E73627D2f00A771a749E38fa781E5d67', ]
-        const allocations = [600000, 200000, 200000]
         const priceEth = 0.1
-        const priceWei = ethers.utils.parseUnits(priceEth.toString(), "ether")
-        const supply = 0
-        const mintLimit = 3
-        const endTime = 1686286044
 
-        // check allocations
-        console.log(accounts)
-        const totalAllocations = allocations.reduce((a, b) => a + b)
-        expect(totalAllocations).to.equal(1000000)
+        const input = {
+            creatorAddress: '0x40211097528189E4Aa814bC2d6c76a7117e5a32C',
+            name: 'Meta',
+            symbol: 'META',
+            uri: 'https://ipfs.thirdwebcdn.com/ipfs/QmeDPAdEdmrjc9d3NeMt3DzusUDG5BjvrLQSpKgXYcG867/0',
+            priceEth: priceEth,
+            priceWei: ethers.utils.parseUnits(priceEth.toString(), "ether"),
+            supply: 0,
+            mintLimit: 3,
+            endTime: 1686286044,
+            proceedAccounts: ['0x40211097528189E4Aa814bC2d6c76a7117e5a32C', '0xF2254525E9f2147990279BA450fb23432040dfdd', '0xFFe7FAc6E73627D2f00A771a749E38fa781E5d67', ],
+            proceedAllocations: [600000, 200000, 200000],
+            feeAccounts: ['0x40211097528189E4Aa814bC2d6c76a7117e5a32C', '0xF2254525E9f2147990279BA450fb23432040dfdd', '0xFFe7FAc6E73627D2f00A771a749E38fa781E5d67', ],
+            feeAllocations: [600000, 200000, 200000]
+        }
+
+        checkAllocations(input)
 
         // Publish
-        const publishTx = await deployer.publishEdition(creatorAddress, name, symbol, inputUri, accounts, allocations, accounts, allocations, priceWei, supply, mintLimit, endTime)
+        const publishTx = await deployer.publishEdition(
+            input.creatorAddress, 
+            input.name, 
+            input.symbol, 
+            input.uri, 
+            input.proceedAccounts, 
+            input.proceedAllocations, 
+            input.feeAccounts, 
+            input.feeAllocations, 
+            input.priceWei, 
+            input.supply, 
+            input.mintLimit, 
+            input.endTime
+        )
         const publishedAddress = await getPublishedAddress(publishTx)
-        const remix = await ethers.getContractAt(EDITION_CONTRACT_NAME, publishedAddress)
-
-        // Get Addresses
-        const creatorSplitAddress = await remix.creatorProceedRecipient()
-        console.log("Creator split address:  " + creatorSplitAddress)
-        const derivativeFeeSplitAddress = await remix.derivativeFeeRecipient()
-        console.log("Derivatve Fee split address: " + derivativeFeeSplitAddress)
-
-        const ownerAddress = await remix.owner()
-        console.log("Owner address: " + ownerAddress)
-        expect(ownerAddress).to.equal(creatorAddress)
-
-        // Save balances
-        const prePurchaseWalletBalance = await signer.getBalance();
-        const prePurchaseContractBalance = await ethers.provider.getBalance(publishedAddress)
-        const prePurchaseProceedBalance = await ethers.provider.getBalance(creatorSplitAddress)
-        const prePurchaseFeeBalance = await ethers.provider.getBalance(derivativeFeeSplitAddress)
-
-        // Purchase
-        const purchaseQuantity = 1
-        const basePrice = .1
-        const purchasePrice = basePrice + DERIVATIVE_FEE
-        const purchasePriceEth = ethers.utils.parseEther(purchasePrice.toString());
-        const options = {
-            value: purchasePriceEth
-        }
-        const purchaseTx = await remix.purchase(purchaseQuantity, options)
-        const purchaseTxReceipt = await purchaseTx.wait()
-        const purchaseGasCost = ethers.BigNumber.from(purchaseTxReceipt.effectiveGasPrice.mul(purchaseTxReceipt.cumulativeGasUsed))
-
-        // Check NFT Data
-        const remixUri = await remix.tokenURI(0)
-        expect(remixUri).to.equal(inputUri);
-
-        const masterUri = await remix.contractURI()
-        expect(masterUri).to.equal(inputUri);
-
-        // Check Money Flow - Purchaser
-        const purchaseWalletBalance = await signer.getBalance();
-        const expectedBalance = prePurchaseWalletBalance.sub(purchasePriceEth).sub(purchaseGasCost);
-        expect(purchaseWalletBalance).to.equal(expectedBalance);
-
-        // Check Money Flow - Contract
-        const postPurchaseContractBalance = await ethers.provider.getBalance(publishedAddress)
-        expect(postPurchaseContractBalance).to.equal(prePurchaseContractBalance)
-
-        // Check Money Flow - Fee Address
-        const postPurchaseFeeBalance = await ethers.provider.getBalance(derivativeFeeSplitAddress)
-        const totalFees = ethers.utils.parseEther((DERIVATIVE_FEE * purchaseQuantity).toString())
-        const expectedFeeBalance = ethers.BigNumber.from(prePurchaseFeeBalance).add(totalFees)
-        expect(postPurchaseFeeBalance).to.equal(expectedFeeBalance)
-
-        // Check Money Flow - Proceeds Address
-        const postPurchaseProceedBalance = await ethers.provider.getBalance(creatorSplitAddress)
-        const totalProceeds = ethers.utils.parseEther((basePrice * purchaseQuantity).toString())
-        const expectedProceedBalance = ethers.BigNumber.from(prePurchaseProceedBalance).add(totalProceeds)
-        expect(postPurchaseProceedBalance).to.equal(expectedProceedBalance)
-
-
+    
+        await testPurchase(publishedAddress, input)
 
     });
 });
