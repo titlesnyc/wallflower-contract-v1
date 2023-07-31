@@ -266,28 +266,3 @@ async function testPurchase(publishedAddress, input) {
     expect(postPurchaseProceedBalance).to.equal(expectedProceedBalance)
     
 }
-
-
-        // const { SplitsClient } = require('@0xsplits/splits-sdk')
-
-        // =================== Test Split - this doens't work for local dev bc SDK only works on real nets
-        // const chainId = 1
-        // const splitsClient = new SplitsClient({
-        //     chainId
-        // })
-        // const args = {
-        //     splitId: splitAddress,
-        // }
-        // const response = await splitsClient.getSplitMetadata(args)
-        // console.log(response)
-
-
-        // =================== Test Getting Mainnet Splits function
-        // const contractInterface = new hre.ethers.utils.Interface([
-        //     "function PERCENTAGE_SCALE() returns (uint256)",
-        // ]);
-        // const [signer] = await ethers.getSigners();
-        // const connectedContract = new ethers.Contract(splitMainEthereum, contractInterface, signer);
-        // const result = await connectedContract.callStatic.PERCENTAGE_SCALE();
-        // const returnValue = result.toString();
-        // console.log(returnValue);
