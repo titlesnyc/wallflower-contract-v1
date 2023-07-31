@@ -242,13 +242,15 @@ contract TitlesEditionV1 is
         });
 
         uint256 proceeds = totalFunds - totalDerivativeFee;
-        (bool proceedsSuccess, ) = creatorProceedRecipient.call{value: proceeds}("");
-        require(proceedsSuccess, "Failed to send purchase proceeds");
+        if (proceeds > 0) {
+            (bool proceedsSuccess, ) = creatorProceedRecipient.call{value: proceeds}("");
+            require(proceedsSuccess, "Failed to send purchase proceeds");
 
-        emit ProceedsPayout({
-            value: proceeds,
-            recipient: creatorProceedRecipient
-        });
+            emit ProceedsPayout({
+                value: proceeds,
+                recipient: creatorProceedRecipient
+            });
+        }
     }
 
     /**
