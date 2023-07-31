@@ -18,15 +18,13 @@ describe("TitlesPublisher", function () {
         console.log("1️⃣ - Test started")
 
         // Deploy Implementation
-        const RemixImplementation = await hre.ethers.getContractFactory("TitlesEditionV1");
-        const implementation = await RemixImplementation.deploy();
+        const implementation = await hre.ethers.deployContract("TitlesEditionV1");
 
         console.log("🛠 Implementation deployed: ")
         console.log(implementation.address)
 
         // Deploy Deployer
-        const TitlesDeployer = await hre.ethers.getContractFactory("TitlesPublisherV1");
-        const deployer = await TitlesDeployer.deploy(splitMainEthereum, titlesController, distributorFee, ROYALTY_BPS, implementation.address);
+        const deployer = await hre.ethers.deployContract("TitlesPublisherV1", [splitMainEthereum, titlesController, distributorFee, ROYALTY_BPS, implementation.address]);
 
         console.log("Deployer address: " + deployer.address)
 
@@ -162,16 +160,14 @@ describe("TitlesPublisher", function () {
 
         console.log("1️⃣ - Test started")
 
-        // Deploy Implementation
-        const RemixImplementation = await hre.ethers.getContractFactory("TitlesEditionV1");
-        const implementation = await RemixImplementation.deploy();
+         // Deploy Implementation
+         const implementation = await hre.ethers.deployContract("TitlesEditionV1");
 
-        console.log("🛠 Implementation deployed: ")
-        console.log(implementation.address)
-
-        // Deploy Deployer
-        const TitlesDeployer = await hre.ethers.getContractFactory("TitlesPublisherV1");
-        const deployer = await TitlesDeployer.deploy(splitMainEthereum, titlesController, distributorFee, ROYALTY_BPS, implementation.address);
+         console.log("🛠 Implementation deployed: ")
+         console.log(implementation.address)
+ 
+         // Deploy Deployer
+         const deployer = await hre.ethers.deployContract("TitlesPublisherV1", [splitMainEthereum, titlesController, distributorFee, ROYALTY_BPS, implementation.address]);
 
         console.log("Deployer address: " + deployer.address)
         console.log("2️⃣ - Deployed deployer w/ Split Main")
@@ -279,16 +275,14 @@ describe("TitlesPublisher", function () {
 
         console.log("1️⃣ - Test started")
 
-        // Deploy Implementation
-        const RemixImplementation = await hre.ethers.getContractFactory("TitlesEditionV1");
-        const implementation = await RemixImplementation.deploy();
+         // Deploy Implementation
+         const implementation = await hre.ethers.deployContract("TitlesEditionV1");
 
-        console.log("🛠 Implementation deployed: ")
-        console.log(implementation.address)
-
-        // Deploy Deployer
-        const TitlesDeployer = await hre.ethers.getContractFactory("TitlesPublisherV1");
-        const deployer = await TitlesDeployer.deploy(splitMainEthereum, titlesController, distributorFee, ROYALTY_BPS, implementation.address);
+         console.log("🛠 Implementation deployed: ")
+         console.log(implementation.address)
+ 
+         // Deploy Deployer
+         const deployer = await hre.ethers.deployContract("TitlesPublisherV1", [splitMainEthereum, titlesController, distributorFee, ROYALTY_BPS, implementation.address]);
 
         console.log("Deployer address: " + deployer.address)
 

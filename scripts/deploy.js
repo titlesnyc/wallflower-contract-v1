@@ -13,14 +13,14 @@
 
         // Deploy implementation
         const RemixImplementation = await hre.ethers.getContractFactory("TitlesEditionV1");
-        const implementation = await RemixImplementation.deploy();
+        const implementation = await RemixImplementation.deployContract();
 
         // Deploy deployer
         const TitlesDeployer = await hre.ethers.getContractFactory("TitlesPublisherV1");
-        const deployer = await TitlesDeployer.deploy(splitMainEthereum, titlesController, distributorFee, secondaryRoyalty, implementation.address);
+        const deployer = await TitlesDeployer.deployContract(splitMainEthereum, titlesController, distributorFee, secondaryRoyalty, implementation.address);
     
-        await implementation.deployed();
-        await deployer.deployed();
+        await implementation.waitForDeployment();
+        await deployer.waitForDeployment();
     
         console.log(`Deployed implementation contract at ${implementation.address}`)
         console.log(`Deployed deployer contract at ${deployer.address}`);

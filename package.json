@@ -13,7 +13,7 @@
     "@nomicfoundation/hardhat-toolbox": "^2.0.2",
     "erc721a": "^4.2.3",
     "erc721a-upgradeable": "^4.2.3",
-    "hardhat": "^2.14.0"
+    "hardhat": "^2.17.0"
   },
   "dependencies": {
     "@0xsplits/splits-sdk": "^2.9.0",
