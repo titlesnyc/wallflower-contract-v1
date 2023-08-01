@@ -4,7 +4,7 @@
         // Addresses
         const splitMainEthereum = '0x2ed6c4B5dA6378c7897AC67Ba9e43102Feb694EE';
 
-        const titlesController = '0xd9111EbeC09Ae2cb4778e6278d5959929bAA59Cc' // GOERLI (goerli-maxi.eth)
+        const titlesController = '0xEA7c0d05AE85a02ADd86c0FC7b348c997C0B1fF4' // GOERLI (deployer)
         // const titlesController = '0x38b3C65800382Ff3Da70243C5AeFC0A4adA9f97f' // MAINNET (titlesadmin.eth)
 
         // Config values
