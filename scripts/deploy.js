@@ -1,6 +1,9 @@
 (async () => {
     try {
 
+        const EDITION_CONTRACT_NAME = "TitlesEditionV1"
+        const DEPLOYER_CONTRACT_NAME = "TitlesPublisherV1"
+
         // Addresses
         const splitMainEthereum = '0x2ed6c4B5dA6378c7897AC67Ba9e43102Feb694EE';
 
@@ -12,16 +15,16 @@
         const secondaryRoyalty = 1000
 
         // Deploy implementation
-        const implementation = await hre.ethers.deployContract("TitlesEditionV1");
+        const implementation = await hre.ethers.deployContract(EDITION_CONTRACT_NAME);
 
         // Deploy deployer
-        const deployer = await hre.ethers.deployContract("TitlesPublisherV1", [splitMainEthereum, titlesController, distributorFee, secondaryRoyalty, implementation.address]);
+        const deployer = await hre.ethers.deployContract(DEPLOYER_CONTRACT_NAME, [splitMainEthereum, titlesController, distributorFee, secondaryRoyalty, implementation.address]);
     
         await implementation.deployed();
         await deployer.deployed();
     
         console.log(`🚀 Deployed implementation contract at ::::::: ${implementation.address}`)
-        console.log(`🚀 Deployed deployer contract at ::::::: ${deployer.address}`);
+        console.log(`🚀 Deployed deployer contract at ::::::::::::: ${deployer.address}`);
     } catch (err) {
         console.error(err);
         process.exitCode = 1;
