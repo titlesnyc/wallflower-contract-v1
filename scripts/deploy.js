@@ -20,8 +20,8 @@
         await implementation.deployed();
         await deployer.deployed();
     
-        console.log(`Deployed implementation contract at ${implementation.address}`)
-        console.log(`Deployed deployer contract at ${deployer.address}`);
+        console.log(`🚀 Deployed implementation contract at ::::::: ${implementation.address}`)
+        console.log(`🚀 Deployed deployer contract at ::::::: ${deployer.address}`);
     } catch (err) {
         console.error(err);
         process.exitCode = 1;
