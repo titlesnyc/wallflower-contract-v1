@@ -48,13 +48,13 @@ contract TitlesPublisherV1 is Ownable {
     ISplitMain public immutable splitMain;
 
     /// @notice Default address used as Splits controller & Publisher admin
-    address private controller;
+    address public controller;
 
     /// @notice Distributor fee on Splits to promote automated distribution, in BPS (scale 1_000_000)
-    uint32 private splitDistributorFee;
+    uint32 public splitDistributorFee;
 
     /// @notice Portion of secondary sales distributed as royalties, in BPS (scale 10_000) 
-    uint96 private secondaryRoyalty;
+    uint96 public secondaryRoyalty;
 
     /// @notice Address of implementation of TitlesEditionV1 to clone
     address public immutable titlesEditionImplementation;
@@ -156,7 +156,7 @@ contract TitlesPublisherV1 is Ownable {
         
         // Publish TitlesEditionV1 clone contract
         address remixClone = Clones.clone(titlesEditionImplementation);
-        TitlesEditionV1(remixClone).initialize(_creator, _name, _symbol, _uri, proceedRecipient, feeRecipient, _price, _maxSupply, _mintLimitPerWallet, _saleEndTime, secondaryRoyalty);
+        TitlesEditionV1(payable(remixClone)).initialize(_creator, _name, _symbol, _uri, proceedRecipient, feeRecipient, _price, _maxSupply, _mintLimitPerWallet, _saleEndTime, secondaryRoyalty);
 
         // Emit Event
         emit EditionPublished({

@@ -56,6 +56,9 @@ contract TitlesEditionV1 is
     /// @dev Upper limit to the mint batch size for the ERC721A contract
     uint256 private immutable MAX_MINT_BATCH_SIZE = 8;
 
+    /// @dev Sale begins upon initialization
+    bool private saleStarted;
+
     // ================ Edition Metadata ================
     /// @dev Single metadata URI for the contract
     string private remixUri;
@@ -173,6 +176,7 @@ contract TitlesEditionV1 is
         maxSupply = _maxSupply;
         mintLimitPerWallet = _mintLimitPerWallet;
         saleEndTime = _saleEndTime;
+        saleStarted = true;
 
         _setDefaultRoyalty(_creatorProceedRecipient, _secondaryRoyaltyBps);
         transferOwnership(_creator);
@@ -276,6 +280,7 @@ contract TitlesEditionV1 is
      * @return Boolean whether the sale is still active
      */
     function _saleActive() internal view returns (bool) {
+        if (!saleStarted) { return false; }
         if (saleEndTime == 0) { return true; }
         return saleEndTime > block.timestamp;
     }
@@ -327,6 +332,9 @@ contract TitlesEditionV1 is
             amount: funds
         });
     }
+
+    /// @notice Ability to recieve ETH
+    receive() external payable {}
 
     /// @dev See {ERC721-setApprovalForAll}
     function setApprovalForAll(address operator, bool approved) public override onlyAllowedOperatorApproval(operator) {
