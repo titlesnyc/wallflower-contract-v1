@@ -5,6 +5,7 @@ const hre = require("hardhat");
 const EDITION_CONTRACT_NAME = "TitlesEditionV1"
 const DEPLOYER_CONTRACT_NAME = "TitlesPublisherV1"
 const PUBLISH_EVENT_NAME = "EditionPublished"
+const SALE_EVENT_NAME = "Sale"
 
 // Deployer config
 const splitMainEthereum = '0x2ed6c4B5dA6378c7897AC67Ba9e43102Feb694EE';
@@ -284,7 +285,66 @@ describe("TitlesEdition", function () {
         const postContractBalance = await ethers.provider.getBalance(publishedAddress);
         expect(postContractBalance).to.equal(0);
     })
-    
+    it("NFTs can't be purchased if sold out", async function () {
+        const [signer, nonSigner] = await ethers.getSigners()
+        const deployer = await deployContracts(nonSigner.address)
+
+        // Publish
+        const input = standardInput()
+        input.supply = 2
+        const publishedTx = await publishEdition(deployer, input)
+        const publishedAddress = await getPublishedAddress(publishedTx)
+        await testContractData(publishedAddress, input)
+        await testPurchase(publishedAddress, input)
+        await testPurchase(publishedAddress, input)
+        await expect(testPurchase(publishedAddress, input)).to.be.revertedWith('This drop is sold out')
+
+
+    })
+    it("NFTs can't be purchased if minting too many per wallet", async function () {
+        const [signer, nonSigner] = await ethers.getSigners()
+        const deployer = await deployContracts(nonSigner.address)
+
+        // Publish
+        const input = standardInput()
+        input.mintLimit = 2
+        const publishedTx = await publishEdition(deployer, input)
+        const publishedAddress = await getPublishedAddress(publishedTx)
+        await testContractData(publishedAddress, input)
+
+        // Try to purchase 3 at once
+        await expect(testPurchase(publishedAddress, input, 3)).to.be.revertedWith('This wallet cannot purchase that many')
+
+        // Try to purchase 3 in succession
+        await testPurchase(publishedAddress, input, 2)
+        await expect(testPurchase(publishedAddress, input)).to.be.revertedWith('This wallet cannot purchase that many')
+    })
+    it("NFTs can't be purchased if past end date", async function () {
+        const [signer, nonSigner] = await ethers.getSigners()
+        const deployer = await deployContracts(nonSigner.address)
+
+        // Publish
+        const input = standardInput()
+        input.endTime = 2 // long in the past
+        
+        const publishedTx = await publishEdition(deployer, input)
+        const publishedAddress = await getPublishedAddress(publishedTx)
+        await testContractData(publishedAddress, input)
+
+        await expect(testPurchase(publishedAddress, input)).to.be.revertedWith('Sale has ended')
+    })
+    it("sales emit events", async function () {
+        const [signer, nonSigner] = await ethers.getSigners()
+        const deployer = await deployContracts(nonSigner.address)
+
+        // Publish
+        const input = standardInput()
+        
+        const publishedTx = await publishEdition(deployer, input)
+        const publishedAddress = await getPublishedAddress(publishedTx)
+        await testContractData(publishedAddress, input)
+        await testPurchase(publishedAddress, input)
+    })
 })
 
 // =================================================================================================================================================
@@ -358,7 +418,13 @@ async function getPublishedEvent(publishTx) {
     const publishReceipt = await publishTx.wait()
     const event = publishReceipt.events?.find(e => e.event === PUBLISH_EVENT_NAME)
     expect(event).to.not.be.undefined;
+    return event
+}
 
+async function getSaleEvent(saleTx) {
+    const saleReceipt = await saleTx.wait()
+    const event = saleReceipt.events?.find(e => e.event === SALE_EVENT_NAME)
+    expect(event).to.not.be.undefined;
     return event
 }
 
@@ -384,7 +450,7 @@ async function testContractData(publishedAddress, input, royaltyOverride) {
     expect(amount).to.equal(royaltyOverride ?? royaltyBps)
 }
 
-async function testPurchase(publishedAddress, input) {
+async function testPurchase(publishedAddress, input, quantityOverride) {
     const [signer] = await ethers.getSigners();
     const remix = await ethers.getContractAt(EDITION_CONTRACT_NAME, publishedAddress)
 
@@ -399,9 +465,9 @@ async function testPurchase(publishedAddress, input) {
     const prePurchaseFeeBalance = await ethers.provider.getBalance(derivativeFeeSplitAddress)
 
     // Purchase
-    const purchaseQuantity = 1
+    const purchaseQuantity = quantityOverride ?? 1
     const basePrice = input.priceEth
-    const purchasePrice = basePrice + DERIVATIVE_FEE
+    const purchasePrice = (basePrice + DERIVATIVE_FEE) * purchaseQuantity
     const purchasePriceEth = ethers.utils.parseEther(purchasePrice.toString());
     const options = {
         value: purchasePriceEth
@@ -409,6 +475,10 @@ async function testPurchase(publishedAddress, input) {
     const purchaseTx = await remix.purchase(purchaseQuantity, options)
     const purchaseTxReceipt = await purchaseTx.wait()
     const purchaseGasCost = ethers.BigNumber.from(purchaseTxReceipt.effectiveGasPrice.mul(purchaseTxReceipt.cumulativeGasUsed))
+
+    // Check Sale event
+    const saleEvent = await getSaleEvent(purchaseTx)
+    expect (saleEvent.args.quantity).to.equal(purchaseQuantity)
 
     // Check NFT exists & URI
     const remixUri = await remix.tokenURI(0)
