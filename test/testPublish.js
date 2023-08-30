@@ -2,8 +2,8 @@ const { expect } = require("chai");
 const hre = require("hardhat");
 
 // Names
-const EDITION_CONTRACT_NAME = "TitlesEditionV1"
-const DEPLOYER_CONTRACT_NAME = "TitlesPublisherV1"
+const EDITION_CONTRACT_NAME = "TestEditionV1"
+const DEPLOYER_CONTRACT_NAME = "TestPublisherV1"
 const PUBLISH_EVENT_NAME = "EditionPublished"
 const SALE_EVENT_NAME = "Sale"
 
@@ -370,7 +370,7 @@ async function deployContracts(controller, royaltyOverride) {
     console.log("2️⃣ - Deployed deployer")
 
     // Check Base Implementation
-    const baseImplementation = await deployer.titlesEditionImplementation()
+    const baseImplementation = await deployer.testEditionImplementation()
     expect(baseImplementation).to.equal(implementation.address)
 
     return deployer

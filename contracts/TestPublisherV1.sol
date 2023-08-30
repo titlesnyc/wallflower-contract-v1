@@ -1,49 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-/*                                                                                                      
-                                @@@@@@@  @@@@@  .                                                                       
-                            @@@@@@@@@* @@@@@  /@@@@@@@@@%                                                               
-                          @ @@@      #@@@@&      @@@@@@@@@@@@@@                                                         
-                          @@@       @@@@@          /@@@@@@@@@@@@@@@@                                                    
-                        *@@       @@@@@           @@@@@@@     @@@@@   @@(                                               
-                       @@/      @@@@@*          @@@@@@@             @@@@@@@@                                            
-                       @@@                    *@@@@@@%            (@@@@@@@                                              
-                      %@@@@                    @@@@@             @@@@@@@%                                               
-                   @@@@ @@@@.                                  @@@@@@@@                                                 
-                  @@@@@@ /@@@                                 @@@@@@@*                 .@&                              
-                 @@@ @@@@@@@%  @                              &@@@@@@@@@              @@@@@@                            
-                 @@@@ .@@@@  @@@@@                                @@@@@@@@@(         @@@@@@@@@*                         
-                 *@@@@@@      .@@@@@                                  @@@@@@@@@    @@@@@@@%@@@@@&                       
-                   @@@@@   @@@@  @@@@@/                                  *@@@@@   @@@@@@@@&  @@@@@%                     
-                        @@  @@@@@  @@@@@@                                       @@@@@@@@@@@@@  @@@@                     
-                       @@@@@, @@@@@@@@@                                         @@@@@@@  @@@@@@  @                      
-                         @@@@@@ @@@@@&                                            /@@@@@@  @@@@   @@@@@                 
-                           @@@@@@@@@              (                                  @@@@@@. .   @@@@@@@                
-                              @@@@               @@@@@&                                @@@@@@   *@@@ @@@                
-                                   @@@@(       @@@@@@   @@@                              &@@  @@ @@@/ @@                
-                                    @@@@@@@   @@@@@@   @@@@@@@@@                             &@@@ @@@#@                 
-                                       @@@@@@@@@@@         /@@@@@@@@@/                       %@@@  @@                   
-                                          .@@@@@@          @@@@@@@@@@@@@  @@#                 @@@@#@                    
-                                              /          %@@@@@          @@@@@  @@@@@@@@@@@@@@ @@@@                     
-                                                        @@@@@@         @@@@@*  *@@@@@@@@@@@@@   @/                      
-                                                       %@@@@          @@@@@        @@@@                                 
-                                                                    &@@@@%       (@@@(                                  
-                                                                   @@@@@        @@@@                                    
-                                                                               @@@@                                                           
-*/
 
-import "./TitlesEditionV1.sol";
+import "./TestEditionV1.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import {ISplitMain} from "splits-utils/src/interfaces/ISplitMain.sol";
 
 /**
- * @title TITLES Edition Publisher v1
- * @notice A deployer that is used to publish new TITLES Edition contracts
- * @dev A factory that deploys minimal proxies of `TitlesEditionV1.sol`
+ * @title Test Edition Publisher v1
+ * @notice A deployer that is used to publish new Test Edition contracts
+ * @dev A factory that deploys minimal proxies of `TestEditionV1.sol`
  */
-contract TitlesPublisherV1 is Ownable {
+contract TestPublisherV1 is Ownable {
     /// @notice Address of 0xSplits SplitMain contract to use to create new splits
     ISplitMain public immutable splitMain;
 
@@ -56,8 +25,8 @@ contract TitlesPublisherV1 is Ownable {
     /// @notice Portion of secondary sales distributed as royalties, in BPS (scale 10_000) 
     uint96 public secondaryRoyalty;
 
-    /// @notice Address of implementation of TitlesEditionV1 to clone
-    address public immutable titlesEditionImplementation;
+    /// @notice Address of implementation of TestEditionV1 to clone
+    address public immutable testEditionImplementation;
 
     /**
      * @notice Emitted when a remix is successfully published
@@ -79,20 +48,20 @@ contract TitlesPublisherV1 is Ownable {
      * @param _controller Default address used as Splits controller and Publisher admin
      * @param _distributorFee Distributor fee on Splits to promote automated distribution, in BPS (scale 1_000_000)
      * @param _secondaryRoyalty Portion of secondary sales distributed as royalties, in BPS (scale 10_000) 
-     * @param _implementation TitlesEditionV1 base implementation address
+     * @param _implementation TestEditionV1 base implementation address
      */
     constructor(address _splitMainAddress, address _controller, uint32 _distributorFee, uint96 _secondaryRoyalty, address _implementation) {
         splitMain = ISplitMain(_splitMainAddress);
         controller = _controller;
         splitDistributorFee = _distributorFee;
         secondaryRoyalty = _secondaryRoyalty;
-        titlesEditionImplementation = _implementation;
+        testEditionImplementation = _implementation;
 
         transferOwnership(_controller);
     }
 
     /**
-     * @notice Publishes a new TitlesEditionV1 clone, creating Splits for sample attribution
+     * @notice Publishes a new TestEditionV1 clone, creating Splits for sample attribution
      * @param _creator Publisher of the remix
      * @param _name Contract name 
      * @param _symbol Contract symbol 
@@ -154,9 +123,9 @@ contract TitlesPublisherV1 is Ownable {
             feeRecipient = derivativeFeeSplit;
         }
         
-        // Publish TitlesEditionV1 clone contract
-        address remixClone = Clones.clone(titlesEditionImplementation);
-        TitlesEditionV1(payable(remixClone)).initialize(_creator, _name, _symbol, _uri, proceedRecipient, feeRecipient, _price, _maxSupply, _mintLimitPerWallet, _saleEndTime, secondaryRoyalty);
+        // Publish TestEditionV1 clone contract
+        address remixClone = Clones.clone(testEditionImplementation);
+        TestEditionV1(payable(remixClone)).initialize(_creator, _name, _symbol, _uri, proceedRecipient, feeRecipient, _price, _maxSupply, _mintLimitPerWallet, _saleEndTime, secondaryRoyalty);
 
         // Emit Event
         emit EditionPublished({
