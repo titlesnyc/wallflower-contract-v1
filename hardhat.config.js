@@ -49,6 +49,24 @@ module.exports = {
         count: 20,
       },
     },
+    'zora-mainnet': {
+      url: 'https://mainnet.rpc.zora.energy/',
+      accounts: {
+        mnemonic,
+        path: "m/44'/60'/0'/0",
+        initialIndex: 0,
+        count: 20,
+      },
+    },
+    'zora-goerli': {
+      url: 'https://testnet.rpc.zora.energy/',
+      accounts: {
+        mnemonic,
+        path: "m/44'/60'/0'/0",
+        initialIndex: 0,
+        count: 20,
+      },
+    },
   },
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY,
