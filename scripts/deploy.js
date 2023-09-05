@@ -25,9 +25,13 @@
         const distributorFee = 5000
         const secondaryRoyalty = 1000
 
+        console.log("pre-deploy")
+
         // Deploy implementation
         const editionFactory = await ethers.getContractFactory(EDITION_CONTRACT_NAME)
         const implementation = await editionFactory.connect(deployerAddress).deploy();
+
+        console.log("post-deploy")
 
         // Deploy deployer
         const publisherFactory = await ethers.getContractFactory(DEPLOYER_CONTRACT_NAME)

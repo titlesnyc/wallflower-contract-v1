@@ -6,7 +6,7 @@ let mnemonic = process.env.SECRET
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
   solidity: {
-    version: "0.8.20",
+    version: "0.8.19",
     settings: {
       optimizer: {
         enabled: true,
@@ -18,8 +18,8 @@ module.exports = {
   networks: {
     hardhat: {
       forking: {
-        url: process.env.ALCHEMY_MAINNET_URL,
-        blockNumber: 17237588
+        url: process.env.ALCHEMY_MAINNET_URL, // 'https://testnet.rpc.zora.energy/',
+        blockNumber: 17237588 // 1000000
       }
     },
     mainnet: {
@@ -50,7 +50,8 @@ module.exports = {
       },
     },
     'zora-mainnet': {
-      url: 'https://mainnet.rpc.zora.energy/',
+      url: 'https://rpc.zora.energy/',
+      // gasPrice: 3500000000,
       accounts: {
         mnemonic,
         path: "m/44'/60'/0'/0",
@@ -60,6 +61,8 @@ module.exports = {
     },
     'zora-goerli': {
       url: 'https://testnet.rpc.zora.energy/',
+      // gasPrice: 0,
+      //gas: 3500000000,
       accounts: {
         mnemonic,
         path: "m/44'/60'/0'/0",
