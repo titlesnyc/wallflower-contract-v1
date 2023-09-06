@@ -1,19 +1,18 @@
 require("@nomicfoundation/hardhat-toolbox");
-
+require("@nomicfoundation/hardhat-foundry");
 require("dotenv").config();
 let mnemonic = process.env.SECRET;
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
   solidity: {
-    version: "0.8.20",
+    version: "0.8.19",
     settings: {
       optimizer: {
         enabled: true,
         runs: 2000,
       },
       viaIR: true,
-      evmVersion: "paris"
     },
   },
   networks: {
@@ -66,11 +65,12 @@ module.exports = {
     // },
     "zora-goerli": {
       url: "https://testnet.rpc.zora.energy/",
-      gasPrice: 3500000000,
-      gas: 3500000000,
+      // gasPrice: 3500000000,
+      // gas: 3500000000,
       accounts: [process.env.PK],
+      gasPrice: 190000000,
       // accounts: {
-        
+
       //   path: "m/44'/60'/0'/0",
       //   initialIndex: 0,
       //   count: 20,

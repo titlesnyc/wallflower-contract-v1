@@ -7,6 +7,9 @@ typechain-types
 
 # Hardhat files
 cache
+cache_forge
 artifacts
+out
+**/.DS_Store
 
 .deps

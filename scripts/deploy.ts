@@ -1,3 +1,5 @@
+import { ethers } from "hardhat";
+
 (async () => {
     try {
 
