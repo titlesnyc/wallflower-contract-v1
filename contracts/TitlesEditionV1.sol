@@ -1,5 +1,37 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;                                                        
+pragma solidity ^0.8.19;
+
+/*                                                                                                      
+                                @@@@@@@  @@@@@  .                                                                       
+                            @@@@@@@@@* @@@@@  /@@@@@@@@@%                                                               
+                          @ @@@      #@@@@&      @@@@@@@@@@@@@@                                                         
+                          @@@       @@@@@          /@@@@@@@@@@@@@@@@                                                    
+                        *@@       @@@@@           @@@@@@@     @@@@@   @@(                                               
+                       @@/      @@@@@*          @@@@@@@             @@@@@@@@                                            
+                       @@@                    *@@@@@@%            (@@@@@@@                                              
+                      %@@@@                    @@@@@             @@@@@@@%                                               
+                   @@@@ @@@@.                                  @@@@@@@@                                                 
+                  @@@@@@ /@@@                                 @@@@@@@*                 .@&                              
+                 @@@ @@@@@@@%  @                              &@@@@@@@@@              @@@@@@                            
+                 @@@@ .@@@@  @@@@@                                @@@@@@@@@(         @@@@@@@@@*                         
+                 *@@@@@@      .@@@@@                                  @@@@@@@@@    @@@@@@@%@@@@@&                       
+                   @@@@@   @@@@  @@@@@/                                  *@@@@@   @@@@@@@@&  @@@@@%                     
+                        @@  @@@@@  @@@@@@                                       @@@@@@@@@@@@@  @@@@                     
+                       @@@@@, @@@@@@@@@                                         @@@@@@@  @@@@@@  @                      
+                         @@@@@@ @@@@@&                                            /@@@@@@  @@@@   @@@@@                 
+                           @@@@@@@@@              (                                  @@@@@@. .   @@@@@@@                
+                              @@@@               @@@@@&                                @@@@@@   *@@@ @@@                
+                                   @@@@(       @@@@@@   @@@                              &@@  @@ @@@/ @@                
+                                    @@@@@@@   @@@@@@   @@@@@@@@@                             &@@@ @@@#@                 
+                                       @@@@@@@@@@@         /@@@@@@@@@/                       %@@@  @@                   
+                                          .@@@@@@          @@@@@@@@@@@@@  @@#                 @@@@#@                    
+                                              /          %@@@@@          @@@@@  @@@@@@@@@@@@@@ @@@@                     
+                                                        @@@@@@         @@@@@*  *@@@@@@@@@@@@@   @/                      
+                                                       %@@@@          @@@@@        @@@@                                 
+                                                                    &@@@@%       (@@@(                                  
+                                                                   @@@@@        @@@@                                    
+                                                                               @@@@                                                           
+*/                      
 
 import "erc721a-upgradeable/contracts/ERC721AUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
@@ -9,11 +41,11 @@ import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 import "operator-filter-registry/src/upgradeable/DefaultOperatorFiltererUpgradeable.sol";
 
 /**
- * @title Test Edition ERC721 v1
- * @notice The Test Edition contract is an immutable ERC721 implementation that splits a share of proceeds amongst creators of samples used in its creation
+ * @title TITLES Edition ERC721 v1
+ * @notice The TITLES Edition contract is an immutable ERC721 implementation that splits a share of proceeds amongst creators of samples used in its creation
  * @dev An immutable implementation of ERC721A
  */
-contract TestEditionV1 is 
+contract TitlesEditionV1 is 
     ERC721AUpgradeable,  
     ERC2981Upgradeable, 
     ReentrancyGuardUpgradeable,
@@ -106,7 +138,7 @@ contract TestEditionV1 is
     }
 
     /**
-     * @dev Create a new Test Edition contract
+     * @dev Create a new TITLES Edition contract
      * @param _creator Publisher of the edition
      * @param _name Contract name 
      * @param _symbol Contract symbol 
