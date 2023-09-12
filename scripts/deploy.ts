@@ -16,6 +16,7 @@ import { ethers } from "hardhat";
         const titlesControllerGoerli = '0xEA7c0d05AE85a02ADd86c0FC7b348c997C0B1fF4' // GOERLI (deployer)
         const titlesControllerMainnet = '0x38b3C65800382Ff3Da70243C5AeFC0A4adA9f97f' // MAINNET (titlesadmin.eth)
         const titlesControllerEOA = '0xEA7c0d05AE85a02ADd86c0FC7b348c997C0B1fF4' // EOA on all chains
+        const titlesControllerEOAZora = '0x8eb430361937b73243B3519a5AC9420FFF0aD195' // EOA for Zora
 
         // ======================================================
         //    GOERLI / MAINNET CONFIG
