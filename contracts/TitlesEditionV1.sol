@@ -30,7 +30,8 @@ pragma solidity ^0.8.20;
                                                        %@@@@          @@@@@        @@@@                                 
                                                                     &@@@@%       (@@@(                                  
                                                                    @@@@@        @@@@                                    
-                                                                               @@@@                                                           
+                                                                               @@@@   
+                                                                                                                                       
 */                                                         
 
 import "erc721a-upgradeable/contracts/ERC721AUpgradeable.sol";
