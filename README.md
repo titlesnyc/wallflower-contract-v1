@@ -1,4 +1,4 @@
-# TITLES Remix Protocol
+# TITLES Remix Protocol 
 
 This project contains the smart contracts and Hardhat development environment for the Remix Protocol that powers the TITLES ecosystem.
 
