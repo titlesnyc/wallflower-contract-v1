@@ -38,7 +38,6 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/common/ERC2981Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
-import "operator-filter-registry/src/upgradeable/DefaultOperatorFiltererUpgradeable.sol";
 
 /**
  * @title TITLES Edition ERC721 v1
@@ -49,7 +48,6 @@ contract TitlesEditionV1 is
     ERC721AUpgradeable,  
     ERC2981Upgradeable, 
     ReentrancyGuardUpgradeable,
-    DefaultOperatorFiltererUpgradeable,
     OwnableUpgradeable
 {
     // ================ Configuration ================
@@ -166,7 +164,6 @@ contract TitlesEditionV1 is
         __ERC721A_init(_name, _symbol);
         __ERC2981_init();
         __ReentrancyGuard_init();
-        __DefaultOperatorFilterer_init();
         __Ownable_init();
 
         remixUri = _uri;
