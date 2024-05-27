@@ -333,36 +333,6 @@ contract TitlesEditionV1 is
     /// @notice Ability to recieve ETH
     receive() external payable {}
 
-    /// @dev See {ERC721-setApprovalForAll}
-    function setApprovalForAll(address operator, bool approved) public override onlyAllowedOperatorApproval(operator) {
-        super.setApprovalForAll(operator, approved);
-    }
-
-    /// @dev See {ERC721-approve}
-    function approve(address operator, uint256 tokenId) public payable override onlyAllowedOperatorApproval(operator) {
-        super.approve(operator, tokenId);
-    }
-
-    /// @dev See {ERC721-transferFrom}
-    function transferFrom(address from, address to, uint256 tokenId) public payable override onlyAllowedOperator(from) {
-        super.transferFrom(from, to, tokenId);
-    }
-
-    /// @dev See {ERC721-safeTransferFrom}
-    function safeTransferFrom(address from, address to, uint256 tokenId) public payable override onlyAllowedOperator(from) {
-        super.safeTransferFrom(from, to, tokenId);
-    }
-
-    /// @dev See {ERC721-safeTransferFrom}
-    function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory data)
-        public
-        payable
-        override
-        onlyAllowedOperator(from)
-    {
-        super.safeTransferFrom(from, to, tokenId, data);
-    }
-
     /**
      * @notice ERC165 supports interface
      * @param interfaceId interface id to check if supported
